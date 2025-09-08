@@ -1,6 +1,6 @@
 .SpecialHead {
     font-family: cursive;
-    text-shadow: 3px 0 #000000;
+    text-shadow: 3px 0 var(--gray-300);
     font-size: 2rem;
-    color: #982649;
+    color: var(--main-color-alt);
 }

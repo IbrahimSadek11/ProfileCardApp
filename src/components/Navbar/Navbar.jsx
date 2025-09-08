@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { NavLink } from "react-router-dom";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import "./Navbar.css";
 
 function Navbar() {
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const navItems = ["Profile", "Page1", "Page3"];
+  const navItems = [
+    { name: "Profile", path: "/" },
+    { name: "Page1", path: "/page1" },
+    // { name: "Page3", path: "/page3" },
+  ];
 
   return (
     <header id="header">
@@ -13,14 +15,13 @@ function Navbar() {
         <h2>Week 2</h2>
         <div className="navlinks">
           {navItems.map((item, index) => (
-            <a
+            <NavLink
               key={index}
-              href="#"
-              className={activeIndex === index ? "active" : ""}
-              onClick={() => setActiveIndex(index)}
+              to={item.path}
+              className={({ isActive }) => (isActive ? "active" : "")}
             >
-              {item}
-            </a>
+              {item.name}
+            </NavLink>
           ))}
         </div>
         <ThemeToggle />

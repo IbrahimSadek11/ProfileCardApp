@@ -1,9 +1,17 @@
 :root {
-  --main-color: #982649;         
-  --dark-color: #000000;         
-  --light-color: #f4eded;        
-  --white-color: #ffffff;        
+  --main-color: #2196f3;        
+  --main-color-alt: #1787e0;   
+  --dark-color: #1e293b;      
+  --light-color: #f8fafc;       
+  --white-color: #ffffff;   
+  --lightWhite-color: #f4eded;   
+  --accent-color: #f59e0b;    
+  --success-color: #22c55e;    
+  --danger-color: #ef4444;   
+  --gray-300: #d1d5db;  
+  --gray:  #6c757d;
 }
+
 
 body {
   margin: 0;

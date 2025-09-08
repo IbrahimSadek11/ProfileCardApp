@@ -3,7 +3,7 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-    background: #000000;
+    background: var(--main-color);
     width: 320px;
     height: 240px;
     overflow: hidden;
@@ -19,14 +19,14 @@
     left: 0;
     width: 0%;
     height: 100%;
-    background: #982649;
+    background: var(--main-color-alt);
     transition: width 1.5s ease;
     z-index: 0;
     border-radius: 20px;
 }
 
 #ProfileCard:hover {
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    box-shadow: var(--gray-300) 0px 5px 15px;
     transform: translateY(-3px);
     opacity: 0.92;
 }
@@ -52,11 +52,11 @@
     width: 90px;
     height: 90px;
     border-radius: 50%;
-    border: 5px solid white;
+    border: 5px solid var(--white-color);
 }
 
 #ProfileCard .imageSection h2 {
-    color: #f4eded;
+    color: var(--lightWhite-color);
 }
 
 #ProfileCard .Description {
@@ -67,13 +67,13 @@
 }
 
 #ProfileCard .Description h3 {
-    color: #f4eded;
+    color: var(--lightWhite-color);
     font-size: 1rem;
     font-weight: bold;
 }
 
 #ProfileCard .Description p {
     line-height: 1.1;
-    color: #f4eded;    
+    color: var(--lightWhite-color);    
     font-weight: bold;
 }

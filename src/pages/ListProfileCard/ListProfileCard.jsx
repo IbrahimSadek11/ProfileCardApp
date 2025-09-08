@@ -12,7 +12,6 @@ import { useState } from 'react';
 function ListProfileCard() {
   const [filtered, setFiltered] = useState(Profiles);
   function filterData (value) {
-        // console.log("value",value)
         setFiltered(Profiles?.filter(item =>
             item?.name?.toLowerCase()?.includes(value.toLowerCase())
         ))

@@ -9,15 +9,20 @@
     height: 100%;
     border-radius: 15px;
     padding: 5px 10px;
-    border: 1px solid lightgray;
-    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+    border: 1px solid var(--gray-300);
+    box-shadow: var(--lightWhite-color) 1.95px 1.95px 2.6px;
 }
+
+.search input:focus {
+    outline: 2px solid var(--main-color);
+    transition: 0.1s;
+} 
 
 .search i {
     position: absolute;
     right: 10px;
     bottom: 8px;
-    color: #6c757d;
+    color: var(--gray);
 }
 
 
