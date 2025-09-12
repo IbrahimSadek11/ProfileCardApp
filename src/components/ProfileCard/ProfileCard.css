@@ -4,8 +4,8 @@
     flex-direction: column;
     gap: 5px;
     background: var(--main-color);
-    width: 320px;
-    height: 240px;
+    /* width: 320px;
+    height: 240px; */
     overflow: hidden;
     border-radius: 20px;
     transition: all 0.3s ease;
@@ -76,4 +76,50 @@
     line-height: 1.1;
     color: var(--lightWhite-color);    
     font-weight: bold;
+}
+
+@media (max-width: 640px) {
+    #ProfileCard .imageSection h2 {
+        font-size: 1.2rem;
+    }
+    
+    #ProfileCard .Description {
+        align-items: flex-start;
+        padding-left: 10px;
+    }
+    #ProfileCard .Description h3 {
+        font-size: 1rem;
+    }
+    
+   #ProfileCard .Description p {
+        font-size: 0.8rem;
+   }
+}
+
+@media (max-width: 768px) {
+    #ProfileCard .imageSection h2 {
+        font-size: 1.3rem;
+    }
+    
+    #ProfileCard .Description h3 {
+        font-size: 1.1rem;
+    }
+    
+   #ProfileCard .Description p {
+        font-size: 0.9rem;
+   }
+}
+
+@media (min-width: 1536px) {
+    #ProfileCard .imageSection h2 {
+        font-size: 3rem;
+    }
+    
+    #ProfileCard .Description h3 {
+        font-size: 2rem;
+    }
+    
+   #ProfileCard .Description p {
+        font-size: 1.5rem;
+   }
 }

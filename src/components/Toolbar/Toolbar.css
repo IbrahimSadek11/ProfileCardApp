@@ -3,7 +3,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: nowrap;
-    width: calc(100% - 13%);
+    width: 100%;
 }
 
 .Toolbar p {
@@ -15,16 +15,5 @@
 @media (max-width: 768px){
     .Toolbar p {
         font-size: 1rem;
-    }
-}
-
-@media (min-width: 768px) {
-  .Toolbar{
-    width: calc(100% - 20%)
-  }
-}
-@media (min-width: 992px) {
-    .Toolbar{
-        width: calc(100% - 15%);
     }
 }

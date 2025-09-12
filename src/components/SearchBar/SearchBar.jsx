@@ -9,7 +9,7 @@ function SearchBar ({onFilter}) {
     return (
             <div className='search'>
                 <input 
-                    type="search" 
+                    type="text" 
                     placeholder='Search'
                     id="search-input"
                     name="search"  

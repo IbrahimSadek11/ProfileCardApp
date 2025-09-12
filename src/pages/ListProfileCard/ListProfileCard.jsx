@@ -1,56 +1,59 @@
 import './ListProfileCard.css';
 import "../../components/SpecialHead/SpecialHead.css"
 import "../../components/Toolbar/Toolbar.css"
-import "../../components/Pagination/Pagination.css"
 import ProfileCard from '../../components/ProfileCard/ProfileCard';
 import Profiles from '../../data/Profile';
 import SpecialHead from '../../components/SpecialHead/SpecialHead';
 import Toolbar from '../../components/Toolbar/Toolbar';
-import Pagination from '../../components/Pagination/Pagination';
 import { useState } from 'react';
+import LoadMoreButton from "../../components/LoadMoreButton/LoadMoreButton";
+import FallBack from '../../components/FallBack/FallBack';
 
 function ListProfileCard() {
   const [filtered, setFiltered] = useState(Profiles);
-  function filterData (value) {
-        setFiltered(Profiles?.filter(item =>
-            item?.name?.toLowerCase()?.includes(value.toLowerCase())
-        ))
-    }
-    
-  const [currentPage, setCurrentPage] = useState(1);
-  const profilesPerPage = 3;
+  const [visibleCount, setVisibleCount] = useState(3);
 
-  const indexOfLastProfile = currentPage * profilesPerPage;
-  const indexOfFirstProfile = indexOfLastProfile - profilesPerPage;
-  const currentProfiles = filtered.slice(indexOfFirstProfile, indexOfLastProfile);
+  function filterData(value) {
+    setFiltered(
+      Profiles?.filter(item =>
+        item?.name?.toLowerCase()?.includes(value.toLowerCase())
+      )
+    );
+    setVisibleCount(3);
+  }
 
-  const totalPages = Math.ceil(filtered.length / profilesPerPage);
+  const currentProfiles = filtered.slice(0, visibleCount);
 
   return (
     <section id="ListProfileCard">
       <div className="container">
-        <SpecialHead Heading ="Profiles"/>
-        <Toolbar ArrayName = "Profiles" Array = {filtered} onFilter={filterData} />
+        <SpecialHead Heading="Profiles" />
+        <Toolbar ArrayName="Profiles" Array={filtered} onFilter={filterData} />
+
         <div className="row">
-          {currentProfiles.map((profile, index) => (
-            <ProfileCard
-              key={index}
-              name={profile.name}
-              job={profile.job}
-              img={profile.image}
-              phone={profile.phone}
-              email={profile.email}
-            />
-          ))}
+          {filtered.length > 0 ? (
+            currentProfiles.map((profile, index) => (
+              <ProfileCard
+                key={index}
+                name={profile.name}
+                job={profile.job}
+                img={profile.image}
+                phone={profile.phone}
+                email={profile.email}
+              />
+            ))
+          ) : (
+            <FallBack message="Profile Not Found."/>
+          )}
         </div>
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrev={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-          onNext={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-        />
-
+        {filtered.length > 0 && visibleCount < filtered.length && (
+          <LoadMoreButton
+            onClick={() => setVisibleCount(prev => prev + 3)}
+            disabled={visibleCount >= filtered.length}
+            message = "Load More Profiles"
+          />
+        )}
       </div>
     </section>
   );

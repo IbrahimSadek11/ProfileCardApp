@@ -11,11 +11,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+    height: 100%;
 }
 
-#header h2 {
-    font-family: "Bitter", serif;
-    font-size: 1.2rem;
+#header .container h2 {
+    font-family: 'pop';
+    font-size: 1.6rem;
     color: var(--light-color);
 }
 

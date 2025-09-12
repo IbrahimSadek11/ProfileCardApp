@@ -1,18 +1,20 @@
 import { NavLink } from "react-router-dom";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import "./Navbar.css";
+import { Link } from "react-router-dom";
 
 function Navbar() {
   const navItems = [
     { name: "Profile", path: "/" },
-    { name: "Page1", path: "/page1" },
-    // { name: "Page3", path: "/page3" },
+    { name: "Tasks", path: "/tasks" }
   ];
 
   return (
     <header id="header">
       <div className="container">
-        <h2>Week 2</h2>
+        <Link to="/">
+          <h2>Week 2</h2>
+        </Link>
         <div className="navlinks">
           {navItems.map((item, index) => (
             <NavLink

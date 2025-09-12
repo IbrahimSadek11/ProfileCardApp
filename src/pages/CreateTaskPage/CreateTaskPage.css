@@ -1,0 +1,15 @@
+#CreateTaskPage {
+    margin: 100px 0px;
+}
+
+#CreateTaskPage .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 50px;
+    width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+}
+

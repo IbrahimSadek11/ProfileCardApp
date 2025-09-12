@@ -2,7 +2,7 @@ const Profiles =
 [
     {
         name : "Ibrahim Sadek",
-        job : "Software development intern",
+        job : "Software developer",
         image : require("../assets/IbrahimSadek.jpg"),
         phone: "+961 76 732 119",
         email: "ibrahimsadeck1@gmail.com"

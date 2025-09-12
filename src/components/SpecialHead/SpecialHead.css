@@ -1,6 +1,60 @@
 .SpecialHead {
-    font-family: cursive;
-    text-shadow: 3px 0 var(--gray-300);
-    font-size: 2rem;
-    color: var(--main-color-alt);
+  text-transform: uppercase;
+  border: 2px solid black;
+  padding: 10px 20px;
+  font-size: 30px;
+  width: fit-content;
+  position: relative;
+  transition:  0.3s;
+  cursor: default;
+}
+
+.SpecialHead::before,
+.SpecialHead::after {
+  content: "";
+  background-color: var(--main-color, #2196f3);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.SpecialHead:hover::before {
+  z-index: -1;
+  animation: special-left-move 0.7s linear forwards;
+}
+.SpecialHead:hover::after {
+  z-index: -1;
+  animation: special-right-move 0.7s linear forwards;
+}
+.SpecialHead:hover {
+  color: var(--white-color);
+  border: 2px solid var(--white-color);
+  transition-delay: 0.7s;
+}
+
+@keyframes special-left-move {
+  50%   {
+        left: 0px; 
+        width: 0px;
+        height: 100%;
+    }
+  100%  { 
+        left: 0px;
+        border-radius: 0; 
+        width: 51%; 
+        height: 100%;
+    }
+}
+@keyframes special-right-move {
+  50%   { 
+    right: 0px;
+    width: 0px;
+    height: 100%;
+    }
+  100%  { 
+    right: 0px; 
+    border-radius: 0;
+    width: 51%;
+    height: 100%; 
+    }
 }
