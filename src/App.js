@@ -10,13 +10,13 @@ function App() {
   return (
     <BrowserRouter>
       <div className="App">
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<ListProfileCard />} />
-            <Route path="/tasks" element={<ListOfTasks />} />
-            <Route path="/Task/Create" element={<CreateTaskPage />} />
-            <Route path="/Task/Edit" element={<EditTaskPage />} />
-          </Routes>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<ListProfileCard />} />
+          <Route path="/tasks" element={<ListOfTasks />} />
+          <Route path="/Task/Create" element={<CreateTaskPage />} />
+          <Route path="/Task/Edit/:id" element={<EditTaskPage />} /> {/* ← add :id */}
+        </Routes>
       </div>
     </BrowserRouter>
   );

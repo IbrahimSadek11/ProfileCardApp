@@ -1,12 +1,18 @@
 import React from "react";
 import SpecialHead from "../../components/SpecialHead/SpecialHead";
+import './EditTaskPage.css';
+import EditForm from "../../components/EditForm/EditForm";
+import { Link } from "react-router-dom";
 
 function EditTaskPage() {
     return(
         <section id="EditTaskPage">
             <div className="container">
-                <SpecialHead Heading="Create Task" />
-                <h1>Hello from edit page</h1>
+                <SpecialHead Heading="Edit Task" />
+                <Link to="/tasks" className="arrow-left">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </Link>
+                <EditForm />
             </div>
         </section>
     )

@@ -11,5 +11,27 @@
     width: 85%;
     margin-left: auto;
     margin-right: auto;
+    position: relative;
 }
+
+#CreateTaskPage .container .arrow-left {
+    position: absolute;
+    left: 10%;
+    top: 10%;
+    color: var(--main-color);
+    font-size: 1.5rem;
+    transition: all 0.3s;
+}
+
+#CreateTaskPage .container .arrow-left:hover {
+    left: calc(10% - 10px);
+}
+
+@media(max-width:640px) {
+    #CreateTaskPage .container .arrow-left {
+        top: 8%;
+    }
+}
+
+
 

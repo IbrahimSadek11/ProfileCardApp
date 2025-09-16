@@ -61,15 +61,34 @@
   color: var(--white-color);
 }
 .task-table tbody td i {
-  padding-right: 30px;
-  color: var(--gray);
+  color: var(--main-color);
   font-size: 1.1rem;
+  transition: color 0.3s;
 }
+
+.task-table tbody td i.fa-pen:hover {
+  color: var(--main-color-alt); 
+}
+
+.task-table tbody td i:first-child {
+  padding-right: 20px;
+}
+
 .task-table tbody td .delete-btn {
   background: none;       
   border: none;           
   outline: none;          
-  cursor: pointer;        
+  cursor: pointer;     
+}
+
+.task-table tbody td i.fa-trash {
+  color: var(--danger-color);  
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.task-table tbody td i.fa-trash:hover {
+  color: #b91c1c;
 }
 
 .status-pending {

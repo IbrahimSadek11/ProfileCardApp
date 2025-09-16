@@ -12,7 +12,7 @@
   transition:background-color 0.3s, border-color 0.3s, color 0.3s;
 }
 
-.load-more-btn:hover:not(:disabled) {
+.load-more-btn:hover {
   background-color: var(--main-color-alt); 
   border-color: var(--main-color-alt);
   color: var(--white-color);

@@ -13,7 +13,7 @@ function Navbar() {
     <header id="header">
       <div className="container">
         <Link to="/">
-          <h2>Week 2</h2>
+          <h2>Taskify</h2>
         </Link>
         <div className="navlinks">
           {navItems.map((item, index) => (

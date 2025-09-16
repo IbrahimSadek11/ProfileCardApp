@@ -10,6 +10,8 @@
     border-radius: 20px;
     transition: all 0.3s ease;
     position: relative;
+    animation: Up-And-Down 2s ease-in-out infinite;
+
 }
 
 #ProfileCard::before {
@@ -122,4 +124,17 @@
    #ProfileCard .Description p {
         font-size: 1.5rem;
    }
+}
+
+
+@keyframes Up-And-Down {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px); 
+  }
+  100% {
+    transform: translateY(0); 
+  }
 }

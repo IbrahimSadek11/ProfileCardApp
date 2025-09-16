@@ -34,7 +34,7 @@
 .CreateForm .TaskSubject input {
     width: 80%;
     height: 35px;
-    border-radius: 50px;
+    border-radius: 10px;
     outline: none;
     padding: 10px;
     border: 1px solid var(--gray-300);

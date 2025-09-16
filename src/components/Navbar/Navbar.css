@@ -18,7 +18,6 @@
 }
 
 #header .container h2 {
-    font-family: 'pop';
     font-size: 1.6rem;
     color: var(--light-color);
 }
@@ -35,7 +34,6 @@
 }
 
 #header a {
-    font-family: "Bitter", serif;
     text-decoration: none;
     font-size: 1.2rem;
     color: var(--light-color);
