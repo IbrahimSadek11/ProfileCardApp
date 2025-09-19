@@ -1,19 +1,26 @@
-import './ProfileCard.css'
+import React from "react";
+import "./ProfileCard.css";
 
-function ProfileCard(props){
-    return(
-        <div id="ProfileCard">
-            <div className="imageSection">
-                <img src={props.img} alt="profile image" className="StyledImage" loading="lazy"/>
-                <h2>{props.name}</h2>
-            </div>
-            <div className="Description">    
-                <h3>Job: {props.job}</h3>
-                <p>{props.phone}</p>
-                <p>{props.email}</p>
-            </div>
-        </div>
-    )
+function ProfileCard({ img, name, job, phone, email }) {
+  return (
+    <div className="profile-card classic">
+      <div className="banner"></div>
+
+      <div className="avatar">
+        <img src={img} alt={`${name}`} loading="lazy" />
+      </div>
+
+      <h2 className="name">{name}</h2>
+      <h3 className="job">{job}</h3>
+
+      <div className="contact">
+        <p><i className="fa-solid fa-phone"></i> {phone}</p>
+        <p><i className="fa-solid fa-envelope"></i> {email}</p>
+      </div>
+
+      <button className="profile-btn">View Profile</button>
+    </div>
+  );
 }
 
 export default ProfileCard;

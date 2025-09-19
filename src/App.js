@@ -3,8 +3,9 @@ import Navbar from './components/Navbar/Navbar';
 import ListProfileCard from './pages/ListProfileCard/ListProfileCard';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ListOfTasks from './pages/ListOfTasks/ListOfTasks';
-import CreateTaskPage from './pages/CreateTaskPage/CreateTaskPage';
-import EditTaskPage from './pages/EditTaskPage/EditTaskPage';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ManageTaskPage from './pages/ManageTaskPage/ManageTaskPage';
 
 function App() {
   return (
@@ -14,9 +15,10 @@ function App() {
         <Routes>
           <Route path="/" element={<ListProfileCard />} />
           <Route path="/tasks" element={<ListOfTasks />} />
-          <Route path="/Task/Create" element={<CreateTaskPage />} />
-          <Route path="/Task/Edit/:id" element={<EditTaskPage />} /> {/* ← add :id */}
+          <Route path="/Task/Create" element={<ManageTaskPage />} />
+          <Route path="/Task/Edit/:id" element={<ManageTaskPage />} />
         </Routes>
+        <ToastContainer position="top-right" autoClose={3000} />
       </div>
     </BrowserRouter>
   );

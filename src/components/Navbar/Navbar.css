@@ -11,7 +11,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 85%;
+    width: 90%;
+    max-width: 1300px; 
     margin-left: auto;
     margin-right: auto;
     height: 100%;
@@ -20,8 +21,12 @@
 #header .container h2 {
     font-size: 1.6rem;
     color: var(--light-color);
+    transition: color 0.3s;
 }
 
+#header .container h2:hover {
+    color: var(--gray-300);
+}
 #header .navlinks {
     display: flex;
     gap: 20px;
@@ -29,8 +34,7 @@
 }
 
 #header .navlinks .active {
-    color: var(--gray-300);
-    transition: 0.3s;
+    border-bottom: 1px solid var(--white-color);
 }
 
 #header a {
@@ -38,10 +42,9 @@
     font-size: 1.2rem;
     color: var(--light-color);
     font-weight: bold;
+    transition: color 0.3s;
 }
 
-#header i {
-    color: var(--light-color);
-    font-size: 1.2rem;
-    cursor: pointer;
+#header a:hover {
+    color: var(--gray-300);
 }

@@ -14,9 +14,23 @@
   height: 100%;
 }
 
-.task-table-section h2 {
-  font-size: 20px;
+.task-table-section .tool-row .Filter {
+  color: var(--main-color);
   font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.task-table-section .tool-row svg {
+  font-size: 2rem;
+  font-weight: bold;
+}
+.task-table-section .tool-row .chip {
+  outline: 1px solid var(--main-color);
+  border: none;
+}
+
+.task-table-section .tool-row svg, .task-table-section .tool-row .chip{
+  color: var(--main-color);
 }
 
 .task-table-wrapper {
@@ -33,9 +47,18 @@
 }
 
 .task-table thead td {
-  background-color: var(--gray-300);
+  background-color: var(--lightWhite-color);
   font-weight: bold;
   padding: 15px;
+  border: 1px solid var(--gray-300);
+}
+
+.task-table thead td:first-child {
+  border-radius: 5px 0px 0px 0px;
+}
+
+.task-table thead td:last-child {
+  border-radius: 0px 5px 0px 0px;
 }
 
 .task-table tbody td {
@@ -43,6 +66,10 @@
   border-left: 1px solid var(--gray-300);
   padding: 15px;
   transition: background-color 0.3s;
+  max-width: 250px;      
+  white-space: nowrap;    
+  overflow: hidden;       
+  text-overflow: ellipsis;
 }
 
 .task-table tbody tr td:last-child {
@@ -60,34 +87,29 @@
   font-size: 13px;
   color: var(--white-color);
 }
-.task-table tbody td i {
+.task-table tbody td .edit-btn{
   color: var(--main-color);
   font-size: 1.1rem;
   transition: color 0.3s;
 }
 
-.task-table tbody td i.fa-pen:hover {
+.task-table tbody td .edit-btn:hover {
   color: var(--main-color-alt); 
 }
 
-.task-table tbody td i:first-child {
-  padding-right: 20px;
-}
+
 
 .task-table tbody td .delete-btn {
-  background: none;       
-  border: none;           
-  outline: none;          
-  cursor: pointer;     
-}
-
-.task-table tbody td i.fa-trash {
   color: var(--danger-color);  
   cursor: pointer;
   transition: color 0.3s;
+  background: none;       
+  border: none;           
+  outline: none;          
+  cursor: pointer;   
 }
 
-.task-table tbody td i.fa-trash:hover {
+.task-table tbody td .delete-btn:hover {
   color: #b91c1c;
 }
 
@@ -105,4 +127,31 @@
 
 .status-rejected {
   background-color: var(--status-rejected);
+}
+
+.Table-fallback {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--main-color);
+}
+
+.css-yewtcl-MuiButtonBase-root-MuiPaginationItem-root.Mui-selected {
+  background-color: var(--main-color) !important;
+}
+.MuiPaginationItem-root.Mui-selected:hover {
+  background-color: var(--main-color-alt) !important;
+}
+.css-yewtcl-MuiButtonBase-root-MuiPaginationItem-root {
+  background-color: var(--white-color) !important;
+  color: var(--dark-color) !important;
+}
+
+@media (max-width: 640px) {
+  .task-table-section .tool-row .Filter{
+    font-size: 1rem;
+  }
+  .task-table-section .tool-row svg {
+    font-size: 1.7rem;
+  }
 }

@@ -1,11 +1,3 @@
-.theme-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.8rem;
-  color: var(--main-color);
-}
-
 body {
   background-color: var(--white-color);
   color: var(--dark-color);
@@ -27,5 +19,24 @@ body {
   --status-pending: #fbbf24;    
   --status-inprogress: #3b82f6;
   --status-completed: #4ade80; 
-  --status-rejected: #ef4444;       
+  --status-rejected: #ef4444;    
+  --active-color: #e5e7eb; 
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.8rem;
+  color: var(--main-color);
+  transition: color 0.3s;
+}
+.theme-toggle i {
+  color: var(--light-color);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.theme-toggle:hover i{
+  color: var(--gray-300);
 }

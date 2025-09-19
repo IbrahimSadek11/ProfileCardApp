@@ -50,7 +50,6 @@ function ListProfileCard() {
         {filtered.length > 0 && visibleCount < filtered.length && (
           <LoadMoreButton
             onClick={() => setVisibleCount(prev => prev + 3)}
-            disabled={visibleCount >= filtered.length}
             message = "Load More Profiles"
           />
         )}

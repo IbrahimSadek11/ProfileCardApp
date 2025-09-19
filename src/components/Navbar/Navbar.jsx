@@ -20,7 +20,7 @@ function Navbar() {
             <NavLink
               key={index}
               to={item.path}
-              className={({ isActive }) => (isActive ? "active" : "")}
+              className={({isActive}) => (isActive ? "active" : "")} 
             >
               {item.name}
             </NavLink>

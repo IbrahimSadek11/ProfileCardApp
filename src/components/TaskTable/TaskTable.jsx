@@ -4,26 +4,33 @@ import CreateBtn from "../Create-Btn/Create-Btn";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { removed } from "../../features/tasks/tasksSlice";
-import { IconButton, Menu, Chip, Button, Box, Select, MenuItem, FormLabel, TextField } from "@mui/material";
+import { IconButton, Menu, Chip, Button, Box, Select, MenuItem, FormLabel, TextField, Pagination } from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from "@mui/icons-material/Edit";
+import Tooltip from '@mui/material/Tooltip';
 import FilterListIcon from "@mui/icons-material/FilterList";
+import { toast } from "react-toastify";
+import Profiles from "../../data/Profile";
+import FallBack from '../../components/FallBack/FallBack';
 
 function TaskTable() {
-  const tasks = useSelector(s => s.tasks.items);
+  const tasks = useSelector((s) => s.tasks.items);
   const dispatch = useDispatch();
 
   const [anchorEl, setAnchorEl] = useState(null);
-
-  const [field, setField] = useState("");             
+  const [field, setField] = useState("");
   const [pendingValue, setPendingValue] = useState("");
   const [appliedFilter, setAppliedFilter] = useState({ field: "", value: "" });
 
-  const handleToggle = (e) => { 
-    if (anchorEl) { 
-      setAnchorEl(null); 
-    } 
-    else { 
-      setAnchorEl(e.currentTarget); 
-    } 
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 5;
+
+  const handlePageChange = (e, value) => {
+    setPage(value);
+  };
+
+  const handleToggle = (e) => {
+    setAnchorEl(anchorEl ? null : e.currentTarget);
   };
 
   const handleClose = () => setAnchorEl(null);
@@ -31,6 +38,7 @@ function TaskTable() {
   const applyFilter = () => {
     if (field && pendingValue) {
       setAppliedFilter({ field, value: pendingValue });
+      setPage(1);
     } else {
       setAppliedFilter({ field: "", value: "" });
     }
@@ -41,43 +49,57 @@ function TaskTable() {
     setAppliedFilter({ field: "", value: "" });
     setPendingValue("");
     setField("");
+    setPage(1);
   };
 
-  const filteredTasks = tasks.filter(task => {
+  const handleDelete = (id) => {
+    dispatch(removed(id));
+    toast.success(`🗑️ Task deleted successfully!`);
+  };
+
+  const filteredTasks = tasks.filter((task) => {
     if (!appliedFilter.field || !appliedFilter.value) return true;
 
+    if (appliedFilter.field === "id") {
+      return String(task.id).toLowerCase().includes(String(appliedFilter.value).toLowerCase());
+    }
     if (appliedFilter.field === "status") {
       return task.status === appliedFilter.value;
     }
-
     if (appliedFilter.field === "priority") {
       return task.priority === appliedFilter.value;
     }
-
     if (appliedFilter.field === "date") {
       return task.date === appliedFilter.value;
+    }
+    if (appliedFilter.field === "assignee") {
+      return task.assignee === appliedFilter.value;
     }
 
     return true;
   });
 
+  const startIndex = (page - 1) * rowsPerPage;
+  const paginatedTasks = filteredTasks.slice(startIndex, startIndex + rowsPerPage);
+  const pageCount = Math.ceil(filteredTasks.length / rowsPerPage);
+
   return (
     <div className="task-table-section">
-      <div 
-        className="tool-row" 
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-      >
+      <div className="tool-row">
         <Box>
-          <IconButton onClick={handleToggle} color="primary">
-            <FilterListIcon />
-          </IconButton>
+          <label className="Filter">Select Filter :</label>
+          <Tooltip title="Filter">
+            <IconButton onClick={handleToggle} color="primary" >
+              <FilterListIcon />
+            </IconButton>
+          </Tooltip>
 
           {appliedFilter.field && (
             <Chip
               label={`${appliedFilter.field}: ${appliedFilter.value}`}
               onDelete={clearFilter}
-              color="primary"
               variant="outlined"
+              className="chip"
             />
           )}
         </Box>
@@ -85,26 +107,43 @@ function TaskTable() {
         <CreateBtn navigate="/Task/Create" />
       </div>
 
-      <Menu 
-        anchorEl={anchorEl} 
-        open={Boolean(anchorEl)} 
-        onClose={handleClose}
-      >
-        <Box 
-          sx={{ p: 2, width: "220px", display: "flex", flexDirection: "column", gap: 2 }}
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+        <Box
+          sx={{
+            p: 2,
+            width: "220px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
         >
           <FormLabel>Filter by</FormLabel>
 
           <Select
+            sx={{ height : "40px" }}
             value={field}
-            onChange={(e) => { setField(e.target.value); setPendingValue(""); }}
+            onChange={(e) => {
+              setField(e.target.value);
+              setPendingValue("");
+            }}
             displayEmpty
           >
             <MenuItem value="">Select Column</MenuItem>
-            <MenuItem value="status">Status</MenuItem>
+            <MenuItem value="id">ID</MenuItem>
+            <MenuItem value="assignee">Assignee</MenuItem>
             <MenuItem value="priority">Priority</MenuItem>
+            <MenuItem value="status">Status</MenuItem>
             <MenuItem value="date">Deadline</MenuItem>
           </Select>
+
+          {field === "id" && (
+            <TextField
+              placeholder="Enter Task ID"
+              value={pendingValue}
+              onChange={(e) => setPendingValue(e.target.value)}
+              size="small"
+            />
+          )}
 
           {field === "status" && (
             <Select
@@ -142,6 +181,21 @@ function TaskTable() {
             />
           )}
 
+          {field === "assignee" && (
+            <Select
+              value={pendingValue}
+              onChange={(e) => setPendingValue(e.target.value)}
+              displayEmpty
+            >
+              <MenuItem value="">Select Assignee</MenuItem>
+              {Profiles.map((profile, index) => (
+                <MenuItem key={index} value={profile.name}>
+                  {profile.name}
+                </MenuItem>
+              ))}
+            </Select>
+          )}
+
           <Button variant="contained" onClick={applyFilter}>
             Apply Filter
           </Button>
@@ -163,8 +217,8 @@ function TaskTable() {
             </tr>
           </thead>
           <tbody>
-            {filteredTasks.length > 0 ? (
-              filteredTasks.map((task) => (
+            {paginatedTasks.length > 0 ? (
+              paginatedTasks.map((task) => (
                 <tr key={task.id}>
                   <td>{task.id}</td>
                   <td>{task.name}</td>
@@ -188,27 +242,41 @@ function TaskTable() {
                     </span>
                   </td>
                   <td>
-                    <Link to={`/Task/Edit/${task.id}`}>
-                      <i className="fa-solid fa-pen"></i>
-                    </Link>
-                    <button
-                      type="button"
-                      className="delete-btn"
-                      onClick={() => dispatch(removed(task.id))}
-                    >
-                      <i className="fa-solid fa-trash"></i>
-                    </button>
+                    <Tooltip title="Edit" sx={{ padding : "0px" }}>
+                      <IconButton component={Link} to={`/Task/Edit/${task.id}`} className="edit-btn">
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete" sx={{ padding : "0px" }}>
+                      <IconButton onClick={() => handleDelete(task.id)} className="delete-btn">
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="8">No tasks found for the selected filter.</td>
+                <td colSpan="8" className="Table-fallback">
+                  <FallBack message="No tasks found for the selected filter." />
+                </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+        {pageCount > 1 && (
+          <Box display="flex" justifyContent="center" mt={2}>
+            <Pagination
+              count={pageCount}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              shape="rounded"
+              
+            />
+          </Box>
+        )}
     </div>
   );
 }

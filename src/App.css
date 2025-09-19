@@ -13,7 +13,8 @@
   --status-pending: #f59e0b;     
   --status-inprogress: #0075ff;  
   --status-completed: #22c55e;  
-  --status-rejected: #f44336;           
+  --status-rejected: #f44336;      
+  --active-color: #374151;
 }
 
 

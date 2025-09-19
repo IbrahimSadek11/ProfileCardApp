@@ -1,20 +1,27 @@
-#CreateTaskPage {
+#CreateTaskPage, 
+#EditTaskPage 
+{
     margin: 100px 0px;
 }
 
-#CreateTaskPage .container {
+#CreateTaskPage .container,
+#EditTaskPage .container 
+{
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 50px;
-    width: 85%;
+    width: 90%;
+    max-width: 1300px;
     margin-left: auto;
     margin-right: auto;
     position: relative;
 }
 
-#CreateTaskPage .container .arrow-left {
+#CreateTaskPage .container .arrow-left,
+#EditTaskPage .container .arrow-left
+{
     position: absolute;
     left: 10%;
     top: 10%;
@@ -23,15 +30,12 @@
     transition: all 0.3s;
 }
 
-#CreateTaskPage .container .arrow-left:hover {
-    left: calc(10% - 10px);
-}
 
-@media(max-width:640px) {
-    #CreateTaskPage .container .arrow-left {
-        top: 8%;
+@media(max-width:1024px) {
+    #CreateTaskPage .container .arrow-left,
+    #EditTaskPage .container .arrow-left
+    {
+        top: 7%;
     }
 }
-
-
 
