@@ -1,26 +1,33 @@
 import './App.css';
 import Navbar from './components/Navbar/Navbar';
 import ListProfileCard from './pages/ListProfileCard/ListProfileCard';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import ListOfTasks from './pages/ListOfTasks/ListOfTasks';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ManageTaskPage from './pages/ManageTaskPage/ManageTaskPage';
+import AuthPage from './pages/AuthPage/AuthPage';
 
 function App() {
+  const location = useLocation();
+
+  const hideNavbarPaths = ["/login", "/signup"];
+  const shouldShowNavbar = !hideNavbarPaths.includes(location.pathname);
+
   return (
-    <BrowserRouter>
-      <div className="App">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<ListProfileCard />} />
-          <Route path="/tasks" element={<ListOfTasks />} />
-          <Route path="/Task/Create" element={<ManageTaskPage />} />
-          <Route path="/Task/Edit/:id" element={<ManageTaskPage />} />
-        </Routes>
-        <ToastContainer position="top-right" autoClose={3000} />
-      </div>
-    </BrowserRouter>
+    <div className="App">
+      {shouldShowNavbar && <Navbar />}
+      <Routes>
+        <Route path="/" element={<ListProfileCard />} />
+        <Route path="/login" element={<AuthPage type="login" />} />
+        <Route path="/signup" element={<AuthPage type="signup" />} />
+        <Route path="/tasks" element={<ListOfTasks />} />
+        <Route path="/tasks/:id" element={<ListOfTasks />} /> 
+        <Route path="/Task/Create" element={<ManageTaskPage />} />
+        <Route path="/Task/Edit/:id" element={<ManageTaskPage />} />
+      </Routes>
+      <ToastContainer position="top-right" autoClose={3000} />
+    </div>
   );
 }
 

@@ -1,5 +1,6 @@
 import React from "react";
-import './FallBack.css'
+import './FallBack.css';
+
 function FallBack(props){
     return (
         <div className="fallback">

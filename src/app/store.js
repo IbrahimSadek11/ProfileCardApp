@@ -1,35 +1,29 @@
-import { configureStore } from '@reduxjs/toolkit';
-import tasksReducer from '../features/tasks/tasksSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import tasksReducer from "../features/tasks/tasksSlice";
+import storage from "redux-persist/lib/storage";
+import { persistReducer, persistStore } from "redux-persist";
+import { combineReducers } from "redux";
+import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
 
-function loadState() {
-  try {
-    const serializedState = localStorage.getItem('tasks');
-    if (serializedState === null) return undefined;
-    return JSON.parse(serializedState);
-  } catch (e) {
-    console.warn("Could not load state", e);
-    return undefined;
-  }
-}
+const persistConfig = {
+  key: "root",
+  storage,
+};
 
-function saveState(state) {
-  try {
-    const serializedState = JSON.stringify(state.tasks);
-    localStorage.setItem('tasks', serializedState);
-  } catch (e) {
-    console.warn("Could not save state", e);
-  }
-}
+const rootReducer = combineReducers({
+  tasks: tasksReducer,
+});
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
-  reducer: {
-    tasks: tasksReducer,
-  },
-  preloadedState: {
-    tasks: loadState() || { items: [] },
-  }
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
 });
 
-store.subscribe(() => {
-  saveState(store.getState());
-});
+export const persistor = persistStore(store);

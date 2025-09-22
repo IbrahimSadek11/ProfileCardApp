@@ -1,6 +1,7 @@
 const Profiles = 
 [
     {
+        id: 1,
         name : "Ibrahim Sadek",
         job : "Software Developer",
         image : require("../assets/avatar1.png"),
@@ -8,6 +9,7 @@ const Profiles =
         email: "ibrahimsadeck1@gmail.com"
     },
     {
+        id: 2,
         name: "Marwan Najmeddine",   
         job: "Occupational Therapist",
         image: require("../assets/avatar2.png"),
@@ -15,6 +17,7 @@ const Profiles =
         email: "marwannajmeddine1@gmail.com"
     },
     {
+        id: 3,
         name: "Muhamad Abdulrahim",
         job: "Mechanical Engineer",
         image: require("../assets/avatar3.png"),
@@ -22,6 +25,7 @@ const Profiles =
         email: "farhanabdelrahman@gmail.com"
     },
     {
+        id: 4,
         name: "Samer Khalil",       
         job: "UI/UX Designer",
         image: require("../assets/avatar4.png"),
@@ -29,6 +33,7 @@ const Profiles =
         email: "samerkhalil@gmail.com"
     },
     {
+        id: 5,
         name: "Ali Hassan",
         job: "Backend Developer",
         image: require("../assets/avatar5.jpg"),
@@ -36,6 +41,7 @@ const Profiles =
         email: "alihassan@gmail.com"
     },
     {
+        id: 6,
         name: "Laith Mansour",      
         job: "Digital Marketer",
         image: require("../assets/avatar6.png"),
@@ -43,6 +49,7 @@ const Profiles =
         email: "laithmansour@gmail.com"
     },
     {
+        id: 7,
         name: "Omar Fakhry",
         job: "Cloud Engineer",
         image: require("../assets/avatar7.png"),
@@ -50,13 +57,15 @@ const Profiles =
         email: "omarfakhry@gmail.com"
     },
     {
+        id: 8,
         name: "Rami Issa",         
         job: "Data Scientist",
-        image: require("../assets/avatar8.jpg"),
+        image: require("../assets/avatar8.png"),
         phone: "+961 70 556 677",
         email: "ramiissa@gmail.com"
     },
     {
+        id: 9,
         name: "Karima Chami",      
         job: "AI Engineer",
         image: require("../assets/avatar9.png"),
@@ -64,6 +73,7 @@ const Profiles =
         email: "karimachami@gmail.com"
     },
     {
+        id: 10,
         name: "Nour Daher",        
         job: "Front-End Developer",
         image: require("../assets/avatar10.png"),

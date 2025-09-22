@@ -1,4 +1,3 @@
-import react from "react";
 import SearchBar from "../SearchBar/SearchBar";
 import "../SearchBar/SearchBar.css"
 

@@ -1,6 +1,3 @@
-import react from "react";
-import { useState } from "react";
-
 function SearchBar ({onFilter}) {
     function filterData (e) {
         onFilter(e.target.value)

@@ -35,6 +35,7 @@ function ListProfileCard() {
             currentProfiles.map((profile, index) => (
               <ProfileCard
                 key={index}
+                id= {profile.id}
                 name={profile.name}
                 job={profile.job}
                 img={profile.image}

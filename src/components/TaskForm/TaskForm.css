@@ -1,6 +1,3 @@
-/* =========================
-   1) TaskForm Container
-   ========================= */
 .TaskForm {
   display: flex;
   flex-direction: column;
@@ -18,13 +15,7 @@
   gap: 40px;
 }
 
-.TaskForm:hover {
-  transform: translateY(-10px);
-}
 
-/* =========================
-   2) Shared Field Sections
-   ========================= */
 .TaskForm .TaskSubject,
 .TaskForm .TaskDescription {
   display: flex;
@@ -40,12 +31,8 @@
   width: 100%;
 }
 
-/* =========================
-   3) Subject Field (TextField)
-   ========================= */
 .TaskForm .TaskSubject .TaskSubjectInput {
   width: 100%;
-  /* height: 35px; */
 }
 
 .TaskForm .TaskSubject .TaskSubjectInput input {
@@ -75,9 +62,6 @@
   color: var(--main-color);
 }
 
-/* =========================
-   4) Description Field (Multiline)
-   ========================= */
 .TaskForm .TaskDescription .TaskDescriptionInput {
   width: 100%;
 }
@@ -109,17 +93,15 @@
   color: var(--dark-color);
 }
 
-/* =========================
-   5) Grid Group (Selects / Picker Row)
-   ========================= */
 .TaskForm .form-group {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-items: baseline;
   width: 100%;
   gap: 10px;
 }
 
-.TaskForm .AssignTaskSection,
+.TaskForm .AssignTaskSection ,
 .TaskForm .Deadline,
 .TaskForm .TaskPriority,
 .TaskForm .Status {
@@ -131,9 +113,18 @@
   width: 100%;
 }
 
-/* =========================
-   6) Assign/Autocomplete
-   ========================= */
+.error-text {
+  color: #d32f2f; 
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.TaskForm .AssignTaskSection .css-1tlcqt-MuiAutocomplete-root {
+  width: 100%;
+}
+.TaskForm .AssignTaskSection .css-1tlcqt-MuiAutocomplete-root .MuiAutocomplete-input {
+  text-align: center;
+}
+
 .AssignTaskSection .MuiInputBase-root {
   height: 50px;
   border-radius: 10px;
@@ -163,9 +154,6 @@
   color: var(--dark-color);
 }
 
-/* =========================
-   7) Priority / Status Selects
-   ========================= */
 .TaskForm .TaskPriority .PrioritySelect,
 .TaskForm .Status .EditStatusSelect {
   padding: 5px;
@@ -192,9 +180,6 @@
   color: var(--dark-color);
 }
 
-/* =========================
-   8) Deadline (MUI X DatePicker)
-   ========================= */
 .TaskForm .Deadline div.MuiPickersInputBase-root {
   max-width: 100%;
   width: 100%;
@@ -210,7 +195,6 @@
   justify-content: center;
 }
 
-/* Placeholder / value colors */
 .Deadline .MuiPickersSectionList-root,
 .Deadline .MuiInputBase-input {
   color: #9CA3AF;
@@ -246,9 +230,6 @@
   color: var(--dark-color);
 }
 
-/* =========================
-   9) Submit Button
-   ========================= */
 .TaskForm .submit-btn {
   padding: 5px 10px;
   border-radius: 10px;
@@ -270,9 +251,6 @@
   color: var(--lightWhite-color);
 }
 
-/* =========================
-   10) Icon Colors (Selects / Picker)
-   ========================= */
 .TaskForm .AssignTaskSection .css-1umw9bq-MuiSvgIcon-root,
 .TaskForm .Deadline .css-1umw9bq-MuiSvgIcon-root,
 .TaskForm .Status .css-1rfqz7c-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon,
@@ -280,9 +258,6 @@
   color: var(--gray) !important;
 }
 
-/* =========================
-   11) Responsive
-   ========================= */
 @media (max-width: 1024px) {
   .TaskForm {
     border-radius: 10px;
@@ -318,3 +293,4 @@
     width: 100%;
   }
 }
+

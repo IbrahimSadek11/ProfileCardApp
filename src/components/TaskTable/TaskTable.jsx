@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import './TaskTable.css';
 import CreateBtn from "../Create-Btn/Create-Btn";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { removed } from "../../features/tasks/tasksSlice";
 import { IconButton, Menu, Chip, Button, Box, Select, MenuItem, FormLabel, TextField, Pagination } from "@mui/material";
@@ -14,6 +14,8 @@ import Profiles from "../../data/Profile";
 import FallBack from '../../components/FallBack/FallBack';
 
 function TaskTable() {
+  const { id } = useParams();
+  
   const tasks = useSelector((s) => s.tasks.items);
   const dispatch = useDispatch();
 
@@ -58,6 +60,8 @@ function TaskTable() {
   };
 
   const filteredTasks = tasks.filter((task) => {
+    if (id && String(task.assigneeId) !== String(id)) return false;
+
     if (!appliedFilter.field || !appliedFilter.value) return true;
 
     if (appliedFilter.field === "id") {
@@ -72,8 +76,8 @@ function TaskTable() {
     if (appliedFilter.field === "date") {
       return task.date === appliedFilter.value;
     }
-    if (appliedFilter.field === "assignee") {
-      return task.assignee === appliedFilter.value;
+    if (!id && appliedFilter.field === "assignee") {
+      return String(task.assigneeId) === String(appliedFilter.value);
     }
 
     return true;
@@ -104,7 +108,7 @@ function TaskTable() {
           )}
         </Box>
 
-        <CreateBtn navigate="/Task/Create" />
+        {!id && <CreateBtn navigate="/Task/Create" />}
       </div>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
@@ -130,7 +134,7 @@ function TaskTable() {
           >
             <MenuItem value="">Select Column</MenuItem>
             <MenuItem value="id">ID</MenuItem>
-            <MenuItem value="assignee">Assignee</MenuItem>
+            { !id && <MenuItem value="assignee">Assignee</MenuItem> }
             <MenuItem value="priority">Priority</MenuItem>
             <MenuItem value="status">Status</MenuItem>
             <MenuItem value="date">Deadline</MenuItem>
@@ -181,7 +185,7 @@ function TaskTable() {
             />
           )}
 
-          {field === "assignee" && (
+          {!id && field === "assignee" && (
             <Select
               value={pendingValue}
               onChange={(e) => setPendingValue(e.target.value)}
@@ -189,7 +193,7 @@ function TaskTable() {
             >
               <MenuItem value="">Select Assignee</MenuItem>
               {Profiles.map((profile, index) => (
-                <MenuItem key={index} value={profile.name}>
+                <MenuItem key={index} value={profile.id}>
                   {profile.name}
                 </MenuItem>
               ))}
@@ -224,7 +228,7 @@ function TaskTable() {
                   <td>{task.name}</td>
                   <td>{task.description}</td>
                   <td>{task.date}</td>
-                  <td>{task.assignee}</td>
+                  <td>{Profiles.find((p) => String(p.id) === String(task.assigneeId))?.name}</td>
                   <td>{task.priority}</td>
                   <td>
                     <span
@@ -273,7 +277,6 @@ function TaskTable() {
               onChange={handlePageChange}
               color="primary"
               shape="rounded"
-              
             />
           </Box>
         )}

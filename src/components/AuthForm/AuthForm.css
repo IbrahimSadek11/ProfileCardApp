@@ -1,0 +1,68 @@
+.AuthForm {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background: #fff;
+}
+
+.AuthForm .auth-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--main-color);
+}
+
+.AuthForm .auth-subtitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.AuthForm .Signup,
+.AuthForm .Login {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.AuthForm .MuiOutlinedInput-root {
+  border-radius: 10px !important;
+  background-color: #f9f9f9;
+}
+
+.AuthForm .submit-btn {
+  margin-top: 10px !important;
+  padding: 12px;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  background-color: var(--main-color) !important;
+}
+
+.AuthForm .submit-btn:hover {
+  background-color: var(--main-color-alt) !important;
+}
+
+.AuthForm .auth-footer {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.AuthForm .auth-footer span {
+  color: var(--main-color);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+
+@media (max-width: 640px ) {
+    .AuthForm .auth-title {
+        font-size: 1.2rem;
+    }
+    .AuthForm .auth-subtitle {
+        font-size: 0.9rem;
+    }
+}
