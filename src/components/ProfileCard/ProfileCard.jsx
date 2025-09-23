@@ -1,10 +1,13 @@
 import React from "react";
 import "./ProfileCard.css";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function ProfileCard({ id, img, name, job, phone, email }) {
 
   const navigate = useNavigate();
+  const { currentUser } = useSelector((state) => state.auth);
+
   const handleClick = ()=> {
     navigate(`/tasks/${id}`);
   }
@@ -25,7 +28,11 @@ function ProfileCard({ id, img, name, job, phone, email }) {
         <p><i className="fa-solid fa-envelope"></i> {email}</p>
       </div>
 
-      <button className="profile-btn" onClick={handleClick}>View Tasks</button>
+      {currentUser?.role === "admin" && (
+        <button className="profile-btn" onClick={handleClick}>
+          View Tasks
+        </button>
+      )}
     </div>
   );
 }

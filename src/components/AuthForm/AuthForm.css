@@ -3,7 +3,7 @@
   max-width: 400px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 5px;
   background: #fff;
 }
 
@@ -23,7 +23,7 @@
 .AuthForm .Login {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
 
 .AuthForm .MuiOutlinedInput-root {
@@ -31,6 +31,9 @@
   background-color: #f9f9f9;
 }
 
+.AuthForm .MuiFormControl-root.MuiTextField-root  {
+  margin: 0;
+}
 .AuthForm .submit-btn {
   margin-top: 10px !important;
   padding: 12px;

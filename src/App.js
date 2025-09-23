@@ -11,16 +11,16 @@ import AuthPage from './pages/AuthPage/AuthPage';
 function App() {
   const location = useLocation();
 
-  const hideNavbarPaths = ["/login", "/signup"];
+  const hideNavbarPaths = ["/", "/signup"];
   const shouldShowNavbar = !hideNavbarPaths.includes(location.pathname);
 
   return (
     <div className="App">
       {shouldShowNavbar && <Navbar />}
       <Routes>
-        <Route path="/" element={<ListProfileCard />} />
-        <Route path="/login" element={<AuthPage type="login" />} />
-        <Route path="/signup" element={<AuthPage type="signup" />} />
+        <Route path="/" element={<AuthPage/>} />
+        <Route path="/signup" element={<AuthPage/>} />
+        <Route path="/ListProfileCards" element={<ListProfileCard />} />
         <Route path="/tasks" element={<ListOfTasks />} />
         <Route path="/tasks/:id" element={<ListOfTasks />} /> 
         <Route path="/Task/Create" element={<ManageTaskPage />} />

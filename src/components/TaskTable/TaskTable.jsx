@@ -1,22 +1,22 @@
 import React, { useState } from "react";
-import './TaskTable.css';
+import "./TaskTable.css";
 import CreateBtn from "../Create-Btn/Create-Btn";
 import { Link, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { removed } from "../../features/tasks/tasksSlice";
-import { IconButton, Menu, Chip, Button, Box, Select, MenuItem, FormLabel, TextField, Pagination } from "@mui/material";
-import DeleteIcon from '@mui/icons-material/Delete';
+import { IconButton, Menu, Chip, Button, Box, Select, MenuItem, FormLabel, TextField, Pagination, Tooltip } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import Tooltip from '@mui/material/Tooltip';
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { toast } from "react-toastify";
 import Profiles from "../../data/Profile";
-import FallBack from '../../components/FallBack/FallBack';
+import FallBack from "../../components/FallBack/FallBack";
 
 function TaskTable() {
   const { id } = useParams();
-  
+
   const tasks = useSelector((s) => s.tasks.items);
+  const { currentUser } = useSelector((s) => s.auth);
   const dispatch = useDispatch();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -59,13 +59,25 @@ function TaskTable() {
     toast.success(`🗑️ Task deleted successfully!`);
   };
 
-  const filteredTasks = tasks.filter((task) => {
-    if (id && String(task.assigneeId) !== String(id)) return false;
+  const roleFilteredTasks = tasks.filter((task) => {
+    if (currentUser?.role === "user") {
+      return String(task.assigneeId) === String(currentUser.profileId);
+    }
+    return true;
+  });
 
+  const routeFilteredTasks = roleFilteredTasks.filter((task) => {
+    if (id && String(task.assigneeId) !== String(id)) return false;
+    return true;
+  });
+
+  const fullyFilteredTasks = routeFilteredTasks.filter((task) => {
     if (!appliedFilter.field || !appliedFilter.value) return true;
 
     if (appliedFilter.field === "id") {
-      return String(task.id).toLowerCase().includes(String(appliedFilter.value).toLowerCase());
+      return String(task.id)
+        .toLowerCase()
+        .includes(String(appliedFilter.value).toLowerCase());
     }
     if (appliedFilter.field === "status") {
       return task.status === appliedFilter.value;
@@ -79,13 +91,12 @@ function TaskTable() {
     if (!id && appliedFilter.field === "assignee") {
       return String(task.assigneeId) === String(appliedFilter.value);
     }
-
     return true;
   });
 
   const startIndex = (page - 1) * rowsPerPage;
-  const paginatedTasks = filteredTasks.slice(startIndex, startIndex + rowsPerPage);
-  const pageCount = Math.ceil(filteredTasks.length / rowsPerPage);
+  const paginatedTasks = fullyFilteredTasks.slice( startIndex, startIndex + rowsPerPage );
+  const pageCount = Math.ceil(fullyFilteredTasks.length / rowsPerPage);
 
   return (
     <div className="task-table-section">
@@ -93,7 +104,7 @@ function TaskTable() {
         <Box>
           <label className="Filter">Select Filter :</label>
           <Tooltip title="Filter">
-            <IconButton onClick={handleToggle} color="primary" >
+            <IconButton onClick={handleToggle} color="primary">
               <FilterListIcon />
             </IconButton>
           </Tooltip>
@@ -108,7 +119,9 @@ function TaskTable() {
           )}
         </Box>
 
-        {!id && <CreateBtn navigate="/Task/Create" />}
+        {currentUser?.role === "admin" && !id && (
+          <CreateBtn navigate="/Task/Create" />
+        )}
       </div>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
@@ -124,7 +137,7 @@ function TaskTable() {
           <FormLabel>Filter by</FormLabel>
 
           <Select
-            sx={{ height : "40px" }}
+            sx={{ height: "40px" }}
             value={field}
             onChange={(e) => {
               setField(e.target.value);
@@ -134,7 +147,7 @@ function TaskTable() {
           >
             <MenuItem value="">Select Column</MenuItem>
             <MenuItem value="id">ID</MenuItem>
-            { !id && <MenuItem value="assignee">Assignee</MenuItem> }
+            {!id && <MenuItem value="assignee">Assignee</MenuItem>}
             <MenuItem value="priority">Priority</MenuItem>
             <MenuItem value="status">Status</MenuItem>
             <MenuItem value="date">Deadline</MenuItem>
@@ -228,7 +241,9 @@ function TaskTable() {
                   <td>{task.name}</td>
                   <td>{task.description}</td>
                   <td>{task.date}</td>
-                  <td>{Profiles.find((p) => String(p.id) === String(task.assigneeId))?.name}</td>
+                  <td>
+                    {Profiles.find((p) => String(p.id) === String(task.assigneeId))?.name}
+                  </td>
                   <td>{task.priority}</td>
                   <td>
                     <span
@@ -246,13 +261,20 @@ function TaskTable() {
                     </span>
                   </td>
                   <td>
-                    <Tooltip title="Edit" sx={{ padding : "0px" }}>
-                      <IconButton component={Link} to={`/Task/Edit/${task.id}`} className="edit-btn">
+                    <Tooltip title="Edit" sx={{ padding: "0px" }}>
+                      <IconButton
+                        component={Link}
+                        to={`/Task/Edit/${task.id}`}
+                        className="edit-btn"
+                      >
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Delete" sx={{ padding : "0px" }}>
-                      <IconButton onClick={() => handleDelete(task.id)} className="delete-btn">
+                    <Tooltip title="Delete" sx={{ padding: "0px" }}>
+                      <IconButton
+                        onClick={() => handleDelete(task.id)}
+                        className="delete-btn"
+                      >
                         <DeleteIcon />
                       </IconButton>
                     </Tooltip>
@@ -262,24 +284,24 @@ function TaskTable() {
             ) : (
               <tr>
                 <td colSpan="8" className="Table-fallback">
-                  <FallBack message="No tasks found for the selected filter." />
+                  <FallBack message="No tasks found." />
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-        {pageCount > 1 && (
-          <Box display="flex" justifyContent="center" mt={2}>
-            <Pagination
-              count={pageCount}
-              page={page}
-              onChange={handlePageChange}
-              color="primary"
-              shape="rounded"
-            />
-          </Box>
-        )}
+      {pageCount > 1 && (
+        <Box display="flex" justifyContent="center" mt={2}>
+          <Pagination
+            count={pageCount}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+            shape="rounded"
+          />
+        </Box>
+      )}
     </div>
   );
 }
