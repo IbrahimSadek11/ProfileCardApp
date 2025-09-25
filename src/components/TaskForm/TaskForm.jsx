@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { added, updated } from "../../features/tasks/tasksSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import Profiles from "../../data/Profile";
 
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
@@ -24,16 +23,26 @@ import FallBack from "../FallBack/FallBack";
 
 const PRIORITIES = ["Low", "Medium", "High"];
 const STATUSES = ["Pending", "In Progress", "Completed", "Rejected"];
-
 const today = dayjs().startOf("day");
 
 const schema = yup.object({
-  name: yup.string().required("Required").min(3, "Min 3 chars"),
-  description: yup.string().required("Required").min(10, "Min 10 chars"),
-  assigneeId: yup
-    .number()
+  name: yup
+    .string()
+    .trim("No leading/trailing spaces allowed")
+    .strict(true)
     .required("Required")
-    .oneOf(Profiles.map((p) => p.id), "Select a valid assignee"),
+    .min(3, "Min 3 chars")
+    .matches(/\S/, "Cannot be only spaces"),
+
+  description: yup
+    .string()
+    .trim("No leading/trailing spaces allowed")
+    .strict(true)
+    .required("Required")
+    .min(10, "Min 10 chars")
+    .matches(/\S/, "Cannot be only spaces"),
+
+  assigneeId: yup.mixed().required("Required"),
   priority: yup.string().required("Required").oneOf(PRIORITIES),
   status: yup.string().required("Required").oneOf(STATUSES),
   date: yup
@@ -47,18 +56,22 @@ const schema = yup.object({
     }),
 });
 
+
 function TaskForm() {
   const { id } = useParams();
   const tasks = useSelector((state) => state.tasks.items);
+  const profiles = useSelector((state) => state.auth.profiles);
+  const { currentUser } = useSelector((state) => state.auth);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm({
+  const { control, handleSubmit, reset, formState: { errors }, register } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       name: "",
       description: "",
-      assigneeId: null,
+      assigneeId: currentUser?.role === "user" ? currentUser.id : null,
       priority: "",
       date: null,
       status: "Pending",
@@ -71,6 +84,11 @@ function TaskForm() {
     if (id) {
       const existingTask = tasks.find((task) => String(task.id) === String(id));
       if (existingTask) {
+        if (currentUser?.role === "user" && String(existingTask.assigneeId) !== String(currentUser.id)) {
+          setNotFound(true);
+          return;
+        }
+
         reset({
           ...existingTask,
           date: existingTask.date ? dayjs(existingTask.date) : null,
@@ -80,9 +98,13 @@ function TaskForm() {
         setNotFound(true);
       }
     }
-  }, [id, reset, tasks]);
+  }, [id, reset, tasks, currentUser]);
 
   const onSubmit = (data) => {
+    if (currentUser?.role === "user") {
+      data.assigneeId = currentUser.id;
+    }
+
     const taskData = {
       ...data,
       date: data.date.format("YYYY-MM-DD"),
@@ -99,8 +121,12 @@ function TaskForm() {
   };
 
   if (notFound) {
-    return <FallBack message="Task not found." />;
+    return <FallBack message="Task not found or access denied." />;
   }
+
+  const assigneeOptions = currentUser?.role === "user"
+    ? [profiles.find((p) => String(p.id) === String(currentUser.id))].filter(Boolean)
+    : profiles;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -143,32 +169,35 @@ function TaskForm() {
         </div>
 
         <div className="form-group">
-          <div className="AssignTaskSection">
-            <label>Assign task to</label>
-            <Controller
-              name="assigneeId"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  {...field}
-                  disablePortal
-                  disableClearable
-                  options={Profiles}
-                  getOptionLabel={(option) => option.name}
-                  value={Profiles.find((p) => p.id === field.value) || null}
-                  onChange={(event, newValue) => field.onChange(newValue?.id || null)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder="-- Select Assignee --"
-                      error={!!errors.assigneeId}
-                      helperText={errors.assigneeId?.message}
-                    />
-                  )}
-                />
-              )}
-            />
-          </div>
+          {currentUser?.role && (
+            <div className="AssignTaskSection">
+              <label>Assign task to</label>
+              <Controller
+                name="assigneeId"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    disablePortal
+                    disableClearable
+                    options={assigneeOptions}
+                    getOptionLabel={(option) => option.name}
+                    value={assigneeOptions.find((p) => String(p.id) === String(field.value)) || null}
+                    onChange={(event, newValue) => field.onChange(newValue?.id || null)}
+                    disabled={currentUser?.role === "user"}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="-- Select Assignee --"
+                        error={!!errors.assigneeId}
+                        helperText={errors.assigneeId?.message}
+                      />
+                    )}
+                  />
+                )}
+              />
+            </div>
+          )}
 
           <div className="TaskPriority">
             <label>Task Priority</label>

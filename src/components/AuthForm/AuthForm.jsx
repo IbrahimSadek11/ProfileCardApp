@@ -6,28 +6,64 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import KeyIcon from "@mui/icons-material/Key";
 import EmailIcon from "@mui/icons-material/Email";
 import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { signup, login, clearError } from "../../features/auth/authSlice"; 
 import { useDispatch, useSelector } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const signupSchema = yup.object().shape({
-  name: yup.string().required("Name is required").min(3, "Min 3 characters"),
-  email: yup.string().required("Email is required").email("Invalid email"),
-  password: yup.string().required("Password is required").min(6, "Min 6 characters"),
+  name: yup
+    .string()
+    .trim("No leading or trailing spaces allowed")
+    .strict(true)
+    .required("Name is required")
+    .min(6, "Name must be at least 6 characters")
+    .max(30, "Name cannot be longer than 30 characters")
+    .matches(/\S/, "Name cannot be only spaces")
+    .matches(/^[A-Za-z\s]+$/, "Name must only contain letters and spaces")
+    .matches(/^[A-Z]/, "Name must start with an uppercase letter")
+    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row"),
+
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Invalid email format")
+    .matches(
+      /^[\w.-]+@([\w-]+\.)+(com|net|org|edu)$/,
+      "Email must end with .com, .net, .org, or .edu"
+    ),
+
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(8, "Min 8 characters")
+    .matches(/^\S+$/, "No spaces allowed")
+    .matches(/[a-z]/, "Must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "Must contain at least one uppercase letter")
+    .matches(/[0-9]/, "Must contain at least one number")
+    .matches(/[@$!%*?&]/, "Must contain at least one special character (@, $, !, %, *, ?, &)"),
+
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref("password"), null], "Passwords must match")
-    .required("Confirm your password"),
+    .required("Confirm your password")
+    .oneOf([yup.ref("password")], "Passwords must match")
+    .matches(/^\S+$/, "No spaces allowed"),
 });
 
 const loginSchema = yup.object().shape({
   email: yup.string().required("Email is required").email("Invalid email"),
-  password: yup.string().required("Password is required"),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(6, "Min 6 characters")
+    .matches(/^\S+$/, "No spaces allowed"),
 });
 
 function AuthForm() {
@@ -37,6 +73,9 @@ function AuthForm() {
   const isSignup = location.pathname === "/signup";
 
   const { isAuthenticated, error } = useSelector((state) => state.auth);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     control,
@@ -64,7 +103,6 @@ function AuthForm() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      toast.success(isSignup ? "Signup successful 🎉" : "Login successful 🎉");
       navigate("/ListProfileCards");
     }
   }, [isAuthenticated, navigate, isSignup]);
@@ -149,7 +187,7 @@ function AuthForm() {
             render={({ field }) => (
               <TextField
                 {...field}
-                type="password"
+                type={showPassword ? "text" : "password"}
                 variant="outlined"
                 placeholder="Password"
                 fullWidth
@@ -162,6 +200,17 @@ function AuthForm() {
                       <KeyIcon />
                     </InputAdornment>
                   ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        sx={{ paddingRight : "20px" }}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 }}
               />
             )}
@@ -172,7 +221,7 @@ function AuthForm() {
             render={({ field }) => (
               <TextField
                 {...field}
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 variant="outlined"
                 placeholder="Confirm Password"
                 fullWidth
@@ -183,6 +232,23 @@ function AuthForm() {
                   startAdornment: (
                     <InputAdornment position="start">
                       <KeyIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        edge="end"
+                        sx={{ paddingRight : "20px" }}
+                      >
+                        {showConfirmPassword ? (
+                          <VisibilityOff />
+                        ) : (
+                          <Visibility />
+                        )}
+                      </IconButton>
                     </InputAdornment>
                   ),
                 }}
@@ -220,7 +286,7 @@ function AuthForm() {
             render={({ field }) => (
               <TextField
                 {...field}
-                type="password"
+                type={showPassword ? "text" : "password"}
                 variant="outlined"
                 placeholder="Password"
                 fullWidth
@@ -231,6 +297,17 @@ function AuthForm() {
                   startAdornment: (
                     <InputAdornment position="start">
                       <KeyIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        sx={{ paddingRight: "20px" }}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
                     </InputAdornment>
                   ),
                 }}

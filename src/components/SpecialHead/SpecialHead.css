@@ -1,13 +1,11 @@
 .SpecialHead {
-  text-transform: uppercase;
-  font-family: cursive;
-  text-shadow: 3px 0 var(--dark-color);
-  font-size: 3rem;
+  text-transform: capitalize;
+  font-size: 2rem;
   color: var(--main-color);
 }
 
 @media(max-width:640px) {
   .SpecialHead {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 }

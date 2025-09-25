@@ -3,21 +3,22 @@ import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import "./Navbar.css";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/auth/authSlice";
+import LogoutIcon from "@mui/icons-material/Logout";
+import Tooltip from "@mui/material/Tooltip";
 
 function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // get auth state
-  const { isAuthenticated, currentUser } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate("/"); // redirect to login or home after logout
+    navigate("/");
   };
 
   const navItems = [
-    { name: "Profile", path: "/ListProfileCards" },
+    { name: "Profiles", path: "/ListProfileCards" },
     { name: "Tasks", path: "/tasks" },
   ];
 
@@ -38,16 +39,31 @@ function Navbar() {
               {item.name}
             </NavLink>
           ))}
-
-          {/* ✅ Only show logout if logged in */}
-          {isAuthenticated && (
-            <button onClick={handleLogout} className="logout-btn">
-              Logout {currentUser?.name && `(${currentUser.name})`}
-            </button>
-          )}
         </div>
 
-        <ThemeToggle />
+        <div className="user-actions">
+          <Tooltip
+            title="Toggle theme"
+            placement="bottom"
+          >
+            <div>
+              <ThemeToggle />
+            </div>
+          </Tooltip>
+
+          {isAuthenticated && (
+            <Tooltip
+              title="Logout"
+              placement="bottom"
+            >
+              <LogoutIcon
+                className="logout-icon"
+                sx={{ cursor: "pointer" }}
+                onClick={handleLogout}
+              />
+            </Tooltip>
+          )}
+        </div>
       </div>
     </header>
   );

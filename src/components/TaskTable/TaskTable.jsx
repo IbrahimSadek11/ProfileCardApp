@@ -9,7 +9,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { toast } from "react-toastify";
-import Profiles from "../../data/Profile";
 import FallBack from "../../components/FallBack/FallBack";
 
 function TaskTable() {
@@ -17,6 +16,7 @@ function TaskTable() {
 
   const tasks = useSelector((s) => s.tasks.items);
   const { currentUser } = useSelector((s) => s.auth);
+  const profiles = useSelector((s) => s.auth.profiles);
   const dispatch = useDispatch();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -61,7 +61,7 @@ function TaskTable() {
 
   const roleFilteredTasks = tasks.filter((task) => {
     if (currentUser?.role === "user") {
-      return String(task.assigneeId) === String(currentUser.profileId);
+      return String(task.assigneeId) === String(currentUser.id);
     }
     return true;
   });
@@ -75,9 +75,7 @@ function TaskTable() {
     if (!appliedFilter.field || !appliedFilter.value) return true;
 
     if (appliedFilter.field === "id") {
-      return String(task.id)
-        .toLowerCase()
-        .includes(String(appliedFilter.value).toLowerCase());
+      return String(task.id).toLowerCase().includes(String(appliedFilter.value).toLowerCase());
     }
     if (appliedFilter.field === "status") {
       return task.status === appliedFilter.value;
@@ -95,7 +93,7 @@ function TaskTable() {
   });
 
   const startIndex = (page - 1) * rowsPerPage;
-  const paginatedTasks = fullyFilteredTasks.slice( startIndex, startIndex + rowsPerPage );
+  const paginatedTasks = fullyFilteredTasks.slice(startIndex, startIndex + rowsPerPage);
   const pageCount = Math.ceil(fullyFilteredTasks.length / rowsPerPage);
 
   return (
@@ -110,16 +108,20 @@ function TaskTable() {
           </Tooltip>
 
           {appliedFilter.field && (
-            <Chip
-              label={`${appliedFilter.field}: ${appliedFilter.value}`}
-              onDelete={clearFilter}
-              variant="outlined"
-              className="chip"
+          <Chip
+            label={
+              appliedFilter.field === "assignee"
+                ? `Assignee: ${profiles.find((p) => String(p.id) === String(appliedFilter.value))?.name || appliedFilter.value}`
+                : `${appliedFilter.field}: ${appliedFilter.value}`
+            }
+            onDelete={clearFilter}
+            variant="outlined"
+            className="chip"
             />
           )}
         </Box>
 
-        {currentUser?.role === "admin" && !id && (
+        {(currentUser?.role === "admin" || currentUser?.role === "user") && !id && (
           <CreateBtn navigate="/Task/Create" />
         )}
       </div>
@@ -205,8 +207,8 @@ function TaskTable() {
               displayEmpty
             >
               <MenuItem value="">Select Assignee</MenuItem>
-              {Profiles.map((profile, index) => (
-                <MenuItem key={index} value={profile.id}>
+              {profiles.map((profile) => (
+                <MenuItem key={profile.id} value={profile.id}>
                   {profile.name}
                 </MenuItem>
               ))}
@@ -242,7 +244,7 @@ function TaskTable() {
                   <td>{task.description}</td>
                   <td>{task.date}</td>
                   <td>
-                    {Profiles.find((p) => String(p.id) === String(task.assigneeId))?.name}
+                    {profiles.find((p) => String(p.id) === String(task.assigneeId))?.name}
                   </td>
                   <td>{task.priority}</td>
                   <td>
@@ -261,15 +263,17 @@ function TaskTable() {
                     </span>
                   </td>
                   <td>
-                    <Tooltip title="Edit" sx={{ padding: "0px" }}>
-                      <IconButton
-                        component={Link}
-                        to={`/Task/Edit/${task.id}`}
-                        className="edit-btn"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
+                    {(currentUser?.role === "admin" || String(task.assigneeId) === String(currentUser.id)) && (
+                      <Tooltip title="Edit">
+                        <IconButton
+                          component={Link}
+                          to={`/Task/Edit/${task.id}`}
+                          className="edit-btn"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                     <Tooltip title="Delete" sx={{ padding: "0px" }}>
                       <IconButton
                         onClick={() => handleDelete(task.id)}

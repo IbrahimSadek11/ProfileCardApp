@@ -55,30 +55,6 @@ const Profiles =
         image: require("../assets/avatar7.png"),
         phone: "+961 79 112 233",
         email: "omarfakhry@gmail.com"
-    },
-    {
-        id: 8,
-        name: "Rami Issa",         
-        job: "Data Scientist",
-        image: require("../assets/avatar8.png"),
-        phone: "+961 70 556 677",
-        email: "ramiissa@gmail.com"
-    },
-    {
-        id: 9,
-        name: "Karima Chami",      
-        job: "AI Engineer",
-        image: require("../assets/avatar9.png"),
-        phone: "+961 71 667 788",
-        email: "karimachami@gmail.com"
-    },
-    {
-        id: 10,
-        name: "Nour Daher",        
-        job: "Front-End Developer",
-        image: require("../assets/avatar10.png"),
-        phone: "+961 76 778 889",
-        email: "nourdaher@gmail.com"
     }
 ]
 

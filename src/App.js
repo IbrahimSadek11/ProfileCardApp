@@ -7,6 +7,9 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ManageTaskPage from './pages/ManageTaskPage/ManageTaskPage';
 import AuthPage from './pages/AuthPage/AuthPage';
+import NotFound from './pages/NotFound/NotFound';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop/ScrollToTop';
 
 function App() {
   const location = useLocation();
@@ -16,16 +19,62 @@ function App() {
 
   return (
     <div className="App">
+      <ScrollToTop />
       {shouldShowNavbar && <Navbar />}
+
       <Routes>
-        <Route path="/" element={<AuthPage/>} />
-        <Route path="/signup" element={<AuthPage/>} />
-        <Route path="/ListProfileCards" element={<ListProfileCard />} />
-        <Route path="/tasks" element={<ListOfTasks />} />
-        <Route path="/tasks/:id" element={<ListOfTasks />} /> 
-        <Route path="/Task/Create" element={<ManageTaskPage />} />
-        <Route path="/Task/Edit/:id" element={<ManageTaskPage />} />
+        <Route path="/" element={<AuthPage />} />
+        <Route path="/signup" element={<AuthPage />} />
+        <Route
+          path="/ListProfileCards"
+          element={
+            <ProtectedRoute>
+              <ListProfileCard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tasks"
+          element={
+            <ProtectedRoute>
+              <ListOfTasks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tasks/:id"
+          element={
+            <ProtectedRoute>
+              <ListOfTasks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Task/Create"
+          element={
+            <ProtectedRoute>
+              <ManageTaskPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Task/Edit/:id"
+          element={
+            <ProtectedRoute>
+              <ManageTaskPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path="*" 
+          element={
+            <ProtectedRoute>
+              <NotFound />
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
+
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );

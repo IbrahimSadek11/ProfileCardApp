@@ -1,66 +1,54 @@
-import { createSlice, nanoid } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+import initialProfiles from "../../data/Profile";
 
 const initialUsers = [
   {
     id: "1",
-    name: "Ibrahim Sadek",
     email: "ibrahimsadeck1@gmail.com",
     password: "123456",
     role: "admin",
-    profileId: 1,
   },
   {
     id: "2",
-    name: "Marwan Najmeddine",
     email: "marwannajmeddine1@gmail.com",
     password: "123456",
     role: "user",
-    profileId: 2,
   },
   {
     id: "3",
-    name: "Muhamad Abdulrahim",
     email: "farhanabdelrahman@gmail.com",
     password: "123456",
     role: "user",
-    profileId: 3,
   },
   {
     id: "4",
-    name: "Samer Khalil",
     email: "samerkhalil@gmail.com",
     password: "123456",
     role: "user",
-    profileId: 4,
   },
   {
     id: "5",
-    name: "Ali Hassan",
     email: "alihassan@gmail.com",
     password: "123456",
     role: "user",
-    profileId: 5,
   },
   {
     id: "6",
-    name: "Laith Mansour",
     email: "laithmansour@gmail.com",
     password: "123456",
     role: "user",
-    profileId: 6,
   },
   {
     id: "7",
-    name: "Omar Fakhry",
     email: "omarfakhry@gmail.com",
     password: "123456",
     role: "user",
-    profileId: 7,
   },
 ];
 
 const initialState = {
-  users: initialUsers,
+  users: initialUsers,      
+  profiles: initialProfiles,
   currentUser: null,
   isAuthenticated: false,
   error: null,
@@ -74,25 +62,45 @@ const authSlice = createSlice({
       prepare({ confirmPassword, email, ...user }) {
         return {
           payload: {
-            id: nanoid(),
-            role: "user",
             email: email.toLowerCase(),
-            ...user,
+            userData: user,
           },
         };
       },
       reducer(state, action) {
-        const exists = state.users.some((u) => u.email === action.payload.email);
+        const { email, userData } = action.payload;
 
+        const exists = state.users.some((u) => u.email === email);
         if (exists) {
           state.error = "Email already taken.";
           state.isAuthenticated = false;
-        } else {
-          state.users.push(action.payload);
-          state.currentUser = action.payload;
-          state.isAuthenticated = true;
-          state.error = null;
+          return;
         }
+
+        const newId = String(state.users.length + 1);
+
+        const newUser = {
+          id: newId,
+          role: "user",
+          email,
+          password: userData.password,
+        };
+
+        const newProfile = {
+          id: newId,
+          name: userData.name,
+          job: userData.job || "unknown position",
+          phone: userData.phone || "unknown number",
+          email,
+          image: require("../../assets/default.png"),
+        };
+
+        state.users.push(newUser);
+        state.profiles.push(newProfile);
+
+        state.currentUser = newUser;
+        state.isAuthenticated = true;
+        state.error = null;
       },
     },
 
@@ -100,9 +108,7 @@ const authSlice = createSlice({
       const email = action.payload.email.toLowerCase();
       const { password } = action.payload;
 
-      const foundUser = state.users.find(
-        (u) => u.email === email && u.password === password
-      );
+      const foundUser = state.users.find((u) => u.email === email && u.password === password);
 
       if (foundUser) {
         state.currentUser = foundUser;

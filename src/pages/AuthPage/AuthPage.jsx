@@ -10,6 +10,7 @@ function AuthPage() {
           <img
             src= {LoginImg}
             alt="Illustration"
+            loading="lazy"
           />
         </div>
         <div className="auth-form-wrapper">

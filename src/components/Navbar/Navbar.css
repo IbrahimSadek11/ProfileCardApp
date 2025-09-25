@@ -48,3 +48,22 @@
 #header a:hover {
     color: var(--gray-300);
 }
+
+
+#header .user-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: color 0.3s;
+}
+
+#header .user-actions .logout-icon {
+    color: var(--light-color);
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+#header .user-actions .logout-icon:hover{
+  color: var(--gray-300);
+}

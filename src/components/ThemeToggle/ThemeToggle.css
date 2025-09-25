@@ -27,13 +27,13 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.8rem;
   color: var(--main-color);
   transition: color 0.3s;
 }
+
 .theme-toggle i {
   color: var(--light-color);
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   cursor: pointer;
 }
 
