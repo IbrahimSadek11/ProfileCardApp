@@ -1,5 +1,5 @@
-import { useLocation, useNavigate } from "react-router-dom";
 import "./AuthForm.css";
+import { useLocation, useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -19,51 +19,18 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const signupSchema = yup.object().shape({
-  name: yup
-    .string()
-    .trim("No leading or trailing spaces allowed")
-    .strict(true)
-    .required("Name is required")
-    .min(6, "Name must be at least 6 characters")
-    .max(30, "Name cannot be longer than 30 characters")
-    .matches(/\S/, "Name cannot be only spaces")
-    .matches(/^[A-Za-z\s]+$/, "Name must only contain letters and spaces")
-    .matches(/^[A-Z]/, "Name must start with an uppercase letter")
-    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row"),
-
-  email: yup
-    .string()
-    .required("Email is required")
-    .email("Invalid email format")
-    .matches(
-      /^[\w.-]+@([\w-]+\.)+(com|net|org|edu)$/,
-      "Email must end with .com, .net, .org, or .edu"
-    ),
-
-  password: yup
-    .string()
-    .required("Password is required")
-    .min(8, "Min 8 characters")
-    .matches(/^\S+$/, "No spaces allowed")
-    .matches(/[a-z]/, "Must contain at least one lowercase letter")
-    .matches(/[A-Z]/, "Must contain at least one uppercase letter")
-    .matches(/[0-9]/, "Must contain at least one number")
-    .matches(/[@$!%*?&]/, "Must contain at least one special character (@, $, !, %, *, ?, &)"),
-
+  name: yup.string().required("Name is required"),
+  email: yup.string().required("Email is required").email("Invalid email"),
+  password: yup.string().required("Password is required"),
   confirmPassword: yup
     .string()
     .required("Confirm your password")
-    .oneOf([yup.ref("password")], "Passwords must match")
-    .matches(/^\S+$/, "No spaces allowed"),
+    .oneOf([yup.ref("password")], "Passwords must match"),
 });
 
 const loginSchema = yup.object().shape({
   email: yup.string().required("Email is required").email("Invalid email"),
-  password: yup
-    .string()
-    .required("Password is required")
-    .min(6, "Min 6 characters")
-    .matches(/^\S+$/, "No spaces allowed"),
+  password: yup.string().required("Password is required"),
 });
 
 function AuthForm() {
@@ -84,36 +51,22 @@ function AuthForm() {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(isSignup ? signupSchema : loginSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
 
   useEffect(() => {
-    reset({
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    });
+    reset({ name: "", email: "", password: "", confirmPassword: "" });
   }, [isSignup, reset]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/ListProfileCards");
+      navigate("/dashboard");
     }
-  }, [isAuthenticated, navigate, isSignup]);
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (error) {
-      if (error.includes("taken")) {
-        toast.error("Email already registered. Please login.");
-      } else {
-        toast.error(error);
-      }
+      toast.error(error);
       dispatch(clearError());
     }
   }, [error, dispatch]);
@@ -143,7 +96,6 @@ function AuthForm() {
             render={({ field }) => (
               <TextField
                 {...field}
-                variant="outlined"
                 placeholder="Enter your name"
                 fullWidth
                 margin="normal"
@@ -165,7 +117,6 @@ function AuthForm() {
             render={({ field }) => (
               <TextField
                 {...field}
-                variant="outlined"
                 placeholder="Enter your email"
                 fullWidth
                 margin="normal"
@@ -188,7 +139,6 @@ function AuthForm() {
               <TextField
                 {...field}
                 type={showPassword ? "text" : "password"}
-                variant="outlined"
                 placeholder="Password"
                 fullWidth
                 margin="normal"
@@ -202,12 +152,8 @@ function AuthForm() {
                   ),
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                        sx={{ paddingRight : "20px" }}
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                        {showPassword ? <Visibility /> : <VisibilityOff />}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -222,7 +168,6 @@ function AuthForm() {
               <TextField
                 {...field}
                 type={showConfirmPassword ? "text" : "password"}
-                variant="outlined"
                 placeholder="Confirm Password"
                 fullWidth
                 margin="normal"
@@ -237,17 +182,10 @@ function AuthForm() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         edge="end"
-                        sx={{ paddingRight : "20px" }}
                       >
-                        {showConfirmPassword ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
+                        {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -264,7 +202,6 @@ function AuthForm() {
             render={({ field }) => (
               <TextField
                 {...field}
-                variant="outlined"
                 placeholder="Email Address"
                 fullWidth
                 margin="normal"
@@ -287,7 +224,6 @@ function AuthForm() {
               <TextField
                 {...field}
                 type={showPassword ? "text" : "password"}
-                variant="outlined"
                 placeholder="Password"
                 fullWidth
                 margin="normal"
@@ -301,12 +237,8 @@ function AuthForm() {
                   ),
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                        sx={{ paddingRight: "20px" }}
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                        {showPassword ? <Visibility /> : <VisibilityOff />}
                       </IconButton>
                     </InputAdornment>
                   ),

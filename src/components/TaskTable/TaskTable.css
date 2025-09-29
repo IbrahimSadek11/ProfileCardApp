@@ -32,6 +32,13 @@
 .task-table-section .tool-row svg, .task-table-section .tool-row .chip{
   color: var(--main-color);
 }
+.task-table-section .tool-row .chip .MuiChip-deleteIcon {
+  color: var(--main-color) !important;
+  transition: color 0.3s ease;
+}
+.task-table-section .tool-row .chip .MuiChip-deleteIcon:hover {
+  color: var(--main-color-alt) !important;
+}
 
 .task-table-wrapper {
   overflow-x: auto;
@@ -154,4 +161,53 @@
   .task-table-section .tool-row svg {
     font-size: 1.7rem;
   }
+}
+
+.FilterButton svg {
+  color: var(--dark-color);
+}
+
+.MuiMenu-paper, 
+.MuiPopover-paper {
+  background-color: var(--lightWhite-color) !important;
+  color: var(--dark-color) !important;
+}
+
+.MuiMenuItem-root {
+  color: var(--dark-color) !important;
+}
+
+.MuiFormLabel-root {
+  color: var(--dark-color) !important;
+}
+
+.MuiSelect-select.MuiOutlinedInput-input {
+  color: var(--dark-color) !important;
+}
+
+.MuiInputBase-input {
+  color: var(--dark-color) !important;
+}
+
+.MuiSelect-icon {
+  color: var(--dark-color) !important;
+}
+
+.MuiOutlinedInput-root {
+  fieldset {
+    border-color: var(--gray-300);
+  }
+}
+
+.MuiOutlinedInput-root:hover fieldset {
+  border-color: var(--main-color) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused fieldset {
+  border-color: var(--main-color) !important;
+}
+
+.MuiPaginationItem-ellipsis {
+  color: var(--dark-color) !important;
+  font-weight: bold;
 }

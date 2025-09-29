@@ -5,43 +5,43 @@ const initialUsers = [
   {
     id: "1",
     email: "ibrahimsadeck1@gmail.com",
-    password: "123456",
+    password: "Hakuna&123",
     role: "admin",
   },
   {
     id: "2",
     email: "marwannajmeddine1@gmail.com",
-    password: "123456",
+    password: "Hakuna&123",
     role: "user",
   },
   {
     id: "3",
     email: "farhanabdelrahman@gmail.com",
-    password: "123456",
+    password: "Hakuna&123",
     role: "user",
   },
   {
     id: "4",
     email: "samerkhalil@gmail.com",
-    password: "123456",
+    password: "Hakuna&123",
     role: "user",
   },
   {
     id: "5",
     email: "alihassan@gmail.com",
-    password: "123456",
+    password: "Hakuna&123",
     role: "user",
   },
   {
     id: "6",
     email: "laithmansour@gmail.com",
-    password: "123456",
+    password: "Hakuna&123",
     role: "user",
   },
   {
     id: "7",
     email: "omarfakhry@gmail.com",
-    password: "123456",
+    password: "Hakuna&123",
     role: "user",
   },
 ];
@@ -130,8 +130,15 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    updatedProfile: (state, action) => {
+      const { id, changes } = action.payload;
+      const profile = state.profiles.find((p) => String(p.id) === String(id));
+      if (profile) {
+        Object.assign(profile, changes);
+      }
+    },
   },
 });
 
-export const { signup, login, logout, clearError } = authSlice.actions;
+export const { signup, login, logout, clearError, updatedProfile } = authSlice.actions;
 export default authSlice.reducer;

@@ -10,6 +10,7 @@ import AuthPage from './pages/AuthPage/AuthPage';
 import NotFound from './pages/NotFound/NotFound';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop/ScrollToTop';
+import Dashboard from './pages/Dashboard/Dashboard';
 
 function App() {
   const location = useLocation();
@@ -25,8 +26,14 @@ function App() {
       <Routes>
         <Route path="/" element={<AuthPage />} />
         <Route path="/signup" element={<AuthPage />} />
+        <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
         <Route
-          path="/ListProfileCards"
+          path="/listProfileCards"
           element={
             <ProtectedRoute>
               <ListProfileCard />
@@ -50,7 +57,7 @@ function App() {
           }
         />
         <Route
-          path="/Task/Create"
+          path="/tasks/Create"
           element={
             <ProtectedRoute>
               <ManageTaskPage />
@@ -58,7 +65,7 @@ function App() {
           }
         />
         <Route
-          path="/Task/Edit/:id"
+          path="/tasks/Edit/:id"
           element={
             <ProtectedRoute>
               <ManageTaskPage />

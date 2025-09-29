@@ -4,15 +4,29 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f5f7fa;
+  background: var(--lightWhite-color);
   overflow: hidden;
+}
+
+#AuthPage .authThemeToggle {
+  position: absolute;
+  top: 5%;
+  right: 5%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#AuthPage .authThemeToggle .theme-toggle i {
+  color: var(--main-color);
+  font-size: 1.5rem;
 }
 
 #AuthPage .container {
   display: flex;
   width: 100%;
   min-height: 100vh;
-  background: #fff;
+  background: var(--white-color);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
 }
 
@@ -27,7 +41,6 @@
 
 .auth-illustration img {
   max-width: 80%;
-  height: auto;
 }
 
 .auth-form-wrapper {
@@ -38,8 +51,8 @@
   padding: 40px 50px;
 }
 
-@media (max-width: 640px ) {
-    .auth-illustration{
-        display: none;
-    }
+@media (max-width: 640px) {
+  .auth-illustration {
+    display: none;
+  }
 }

@@ -11,7 +11,7 @@ function NotFound() {
             <p className="notfound-text">
                 The page you’re looking for doesn’t exist or is unavailable.
             </p>
-            <Link to="/ListProfileCards" className="notfound-btn">
+            <Link to="/dashboard" className="notfound-btn">
                 Go Back Home
             </Link>
         </div>

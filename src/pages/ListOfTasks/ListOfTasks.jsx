@@ -4,6 +4,7 @@ import TaskTable from "../../components/TaskTable/TaskTable";
 import './ListOfTasks.css';
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import FallBack from "../../components/FallBack/FallBack";
 
 function ListOfTasks() {
   const { currentUser, profiles } = useSelector((s) => s.auth);
@@ -17,6 +18,15 @@ function ListOfTasks() {
   } else if (currentUser?.role === "admin") {
     if (id) {
       const profile = profiles.find((p) => String(p.id) === String(id));
+      if (!profile) {
+        return (
+          <section id="ListOfTasks">
+            <div className="container">
+              <FallBack message="❌ This profile does not exist" />
+            </div>
+          </section>
+        );
+      }
       headingText = `Tasks of ${profile.name}`;
     } else {
       headingText = "All Tasks";

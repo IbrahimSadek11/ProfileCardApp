@@ -4,7 +4,7 @@
     height: 60px;
     position: fixed;
     top: 0;
-    z-index: 3;
+    z-index: 100;
 }
 
 #header .container {
@@ -66,4 +66,22 @@
 
 #header .user-actions .logout-icon:hover{
   color: var(--gray-300);
+}
+
+@media (max-width: 640px ) {
+    #header .container h2 {
+        font-size: 1rem;
+    }
+    #header a {
+        font-size: 0.9rem;
+    }
+    #header .user-actions .logout-icon {
+        font-size: 1rem;
+    }
+    #header .navlinks {
+        gap: 15px;
+    }
+    #header .user-actions {
+        gap: 5px;
+    }
 }

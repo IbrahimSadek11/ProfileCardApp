@@ -32,7 +32,8 @@ const schema = yup.object({
     .strict(true)
     .required("Required")
     .min(3, "Min 3 chars")
-    .matches(/\S/, "Cannot be only spaces"),
+    .matches(/\S/, "Cannot be only spaces")
+    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row"),
 
   description: yup
     .string()
@@ -40,7 +41,8 @@ const schema = yup.object({
     .strict(true)
     .required("Required")
     .min(10, "Min 10 chars")
-    .matches(/\S/, "Cannot be only spaces"),
+    .matches(/\S/, "Cannot be only spaces")
+    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row"),
 
   assigneeId: yup.mixed().required("Required"),
   priority: yup.string().required("Required").oneOf(PRIORITIES),
@@ -66,7 +68,7 @@ function TaskForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { control, handleSubmit, reset, formState: { errors }, register } = useForm({
+  const { control, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       name: "",
@@ -144,6 +146,28 @@ function TaskForm() {
                 inputProps={{ maxLength: 100 }}
                 error={!!errors.name}
                 helperText={errors.name?.message}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "var(--white-color)", 
+                    borderRadius: "10px",
+                    "& fieldset": {
+                      borderColor: "var(--gray-300)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "var(--main-color)",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "var(--main-color)",
+                    },
+                  },
+                  "& .MuiInputBase-input": {
+                    color: "var(--dark-color)", 
+                    "&::placeholder": {
+                      color: "#9CA3AF",   
+                      opacity: 1,         
+                    },
+                  },
+                }}
               />
             )}
           />
@@ -163,6 +187,28 @@ function TaskForm() {
                 rows={4}
                 error={!!errors.description}
                 helperText={errors.description?.message}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "var(--white-color)", 
+                    borderRadius: "10px",                  
+                    "& fieldset": {
+                      borderColor: "var(--gray-300)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "var(--main-color)",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "var(--main-color)",
+                    },
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    color: "var(--dark-color)",
+                    "&::placeholder": {
+                      color: "#9CA3AF",
+                      opacity: 1,
+                    },
+                  },
+                }}
               />
             )}
           />
@@ -185,12 +231,69 @@ function TaskForm() {
                     value={assigneeOptions.find((p) => String(p.id) === String(field.value)) || null}
                     onChange={(event, newValue) => field.onChange(newValue?.id || null)}
                     disabled={currentUser?.role === "user"}
+                    noOptionsText={<span style={{ color: "var(--dark-color)" }}>No options</span>}   
+                    sx={{
+                      width: "100%",
+                      "& .MuiAutocomplete-input": {
+                        textAlign: "center",
+                        color: "var(--dark-color)",
+                      },
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "var(--white-color)",
+                        borderRadius: "10px",
+                      },
+                      "& .MuiAutocomplete-option": {
+                        color: "var(--dark-color)",
+                      },
+                    }}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         placeholder="-- Select Assignee --"
                         error={!!errors.assigneeId}
                         helperText={errors.assigneeId?.message}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            backgroundColor: "var(--white-color)",
+                            borderRadius: "10px",
+                            height: "50px",
+
+                            "& fieldset": { borderColor: "var(--gray-300)" },
+                            "&:hover fieldset": { borderColor: "var(--main-color)" },
+                            "&.Mui-focused fieldset": { borderColor: "var(--main-color)" },
+
+                            "&.Mui-disabled": {
+                              backgroundColor: "var(--lightWhite-color)", 
+                              
+                            },
+                            "&.Mui-disabled fieldset": {
+                              borderColor: "var(--gray) !important",
+                            },
+                          },
+                          "& .MuiOutlinedInput-input": {
+                            color: "var(--dark-color)",
+                            "&::placeholder": {
+                              color: "#9CA3AF",
+                              opacity: 1,
+                            },
+                          },
+                          "& .MuiInputBase-input": {
+                            textAlign: "center",
+                            color: "var(--dark-color)",
+                            "&.Mui-disabled": {
+                              color: "var(--gray) !important",             
+                              WebkitTextFillColor: "var(--gray) !important",
+                              opacity: 1,
+                            },
+                          },
+                          "& .MuiSvgIcon-root": {
+                            color: currentUser?.role === "user" ? "var(--gray)" : "var(--dark-color)",
+                          },
+                          "&.Mui-disabled .MuiSvgIcon-root": {
+                            color: "var(--gray) !important", 
+                            opacity: 1,
+                          },
+                        }}
                       />
                     )}
                   />
@@ -207,12 +310,45 @@ function TaskForm() {
               render={({ field }) => (
                 <Select
                   {...field}
-                  className="PrioritySelect"
                   displayEmpty
                   error={!!errors.priority}
                   renderValue={(selected) =>
                     selected ? selected : <span>-- Select Priority --</span>
                   }
+                  sx={{
+                    padding: "5px",
+                    borderRadius: "10px",
+                    textAlign: "center",
+                    height: "50px",
+                    width: "100%",
+                    backgroundColor: "var(--white-color)",
+                    color: "var(--dark-color)",
+
+                    "& fieldset": {
+                      borderColor: "var(--gray-300)",
+                    },
+                    "&:hover fieldset": {
+                        borderColor: "var(--main-color) !important",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "var(--main-color) !important",
+                    },
+
+                    "& span": {
+                      color: "#9CA3AF", 
+                    },
+                    "& .MuiSelect-icon": {
+                      color: "var(--gray)",
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        backgroundColor: "var(--lightWhite-color)",
+                        color: "var(--dark-color)",                
+                      },
+                    },
+                  }}
                 >
                   <MenuItem value="">-- Select Priority --</MenuItem>
                   {PRIORITIES.map((priority, i) => (
@@ -239,17 +375,72 @@ function TaskForm() {
                   format="YYYY-MM-DD"
                   slotProps={{
                     textField: {
-                      placeholder: "-- Select date --",
+                      placeholder: "YYYY-MM-DD",
                       fullWidth: true,
-                      variant: "outlined",
-                      className: "DeadlineInput",
+                      variant: "standard",
                       error: !!errors.date,
-                      helperText: errors.date?.message,
+                      sx: {
+                        "& .MuiPickersInputBase-root": {
+                          height: "50px",
+                          border: `1px solid ${errors.date ? "red" : "var(--gray-300)"}`,
+                          borderRadius: "10px",
+                          backgroundColor: "var(--white-color)",
+                          display: "flex",
+                          alignItems: "center",
+                        },
+                        "& .MuiPickersInputBase-root:before, & .MuiPickersInputBase-root:after": {
+                          borderBottom: "none !important",
+                        },
+                        "& .MuiPickersSectionList-root": {
+                          borderBottom: "none !important",
+                          display: "flex",
+                          alignItems: "center",   
+                          justifyContent: "center",
+                          color: field.value ? "var(--dark-color)" : "#9CA3AF",
+                          opacity: 1,
+                          height: "100%",          
+                        },
+                        "& .MuiPickersSection-root": {
+                          display: "flex",
+                          alignItems: "center",    
+                        },
+                        "& .MuiIconButton-root": {
+                          color: "var(--dark-color)",
+                        },
+                      },
+                    },
+                    popper: {
+                      placement: "top-start",
+                      sx: {
+                        zIndex: 10,
+                        "& .MuiPaper-root": {
+                          backgroundColor: "var(--lightWhite-color)",
+                          color: "var(--dark-color)",
+                          borderRadius: "10px",
+                          border: "1px solid var(--gray-300)",
+                        },
+                        "& .MuiPickersDay-root": {
+                          color: "var(--dark-color)",
+                          borderRadius: "8px",
+                        },
+                        "& .MuiPickersDay-root:not(.Mui-selected)": {
+                          borderColor: "var(--dark-color)",
+                        },
+                        "& .MuiPickersDay-root.Mui-selected": {
+                          backgroundColor: "var(--main-color)",
+                          color: "var(--white-color)",
+                          "&:hover": { backgroundColor: "var(--main-color-alt)" },
+                        },
+                        "& .MuiDayCalendar-weekDayLabel": { color: "var(--dark-color)" },
+                        "& .MuiPickersCalendarHeader-label": { color: "var(--dark-color)" },
+                        "& .MuiIconButton-root": { color: "var(--dark-color)" },
+                      },
                     },
                   }}
                 />
               )}
             />
+            {errors.date && <p className="error-text">{errors.date.message}</p>}
           </div>
 
           {id && (
@@ -264,9 +455,43 @@ function TaskForm() {
                     displayEmpty
                     fullWidth
                     className="EditStatusSelect"
+                    error={!!errors.status}
                     renderValue={(selected) =>
                       selected ? selected : <em>-- Select Status --</em>
                     }
+                    sx={{
+                      padding: "5px",
+                      borderRadius: "10px",
+                      textAlign: "center",
+                      height: "50px",
+                      width: "100%",
+                      backgroundColor: "var(--white-color)",
+                      color: "var(--dark-color)",
+
+                      "& fieldset": {
+                        borderColor: "var(--gray-300)",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "var(--main-color) !important",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "var(--main-color) !important",
+                      },
+                      "& em": {
+                        color: "#9CA3AF",
+                      },
+                      "& .MuiSelect-icon": {
+                        color: "var(--gray)",
+                      },
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          backgroundColor: "var(--lightWhite-color)",
+                          color: "var(--dark-color)",
+                        },
+                      },
+                    }}
                   >
                     <MenuItem value="">
                       <em>-- Select Status --</em>

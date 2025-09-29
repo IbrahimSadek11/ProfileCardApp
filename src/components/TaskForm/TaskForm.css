@@ -39,60 +39,9 @@
   color: var(--dark-color);
 }
 
-.TaskForm .TaskSubject .TaskSubjectInput input::placeholder {
-  color: #9CA3AF;
-  opacity: 1;
-}
-
-/* MUI outlined TextField - Subject */
-.TaskSubjectInput .MuiOutlinedInput-root fieldset {
-  border-color: var(--gray-300) !important;
-  border-radius: 10px;
-}
-
-.TaskSubjectInput .MuiOutlinedInput-root.Mui-focused fieldset {
-  border-color: var(--main-color) !important;
-}
-
-.TaskSubjectInput .MuiInputLabel-root {
-  color: var(--gray);
-}
-
-.TaskSubjectInput .MuiInputLabel-root.Mui-focused {
-  color: var(--main-color);
-}
-
 .TaskForm .TaskDescription .TaskDescriptionInput {
   width: 100%;
 }
-
-.TaskForm .TaskDescription .TaskDescriptionInput textarea::placeholder {
-  color: #9CA3AF;
-  opacity: 1;
-}
-
-/* MUI outlined TextField - Description */
-.TaskDescriptionInput .MuiOutlinedInput-root fieldset {
-  border-color: var(--gray-300) !important;
-  border-radius: 10px;
-}
-
-.TaskDescriptionInput .MuiOutlinedInput-root.Mui-focused fieldset {
-  border-color: var(--main-color) !important;
-}
-
-.TaskDescriptionInput .MuiInputLabel-root {
-  color: var(--gray);
-}
-
-.TaskDescriptionInput .MuiInputLabel-root.Mui-focused {
-  color: var(--main-color);
-}
-
-.TaskDescriptionInput .MuiOutlinedInput-input {
-  color: var(--dark-color);
-}
-
 .TaskForm .form-group {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -118,117 +67,19 @@
   font-size: 0.8rem;
   font-weight: 500;
 }
-.TaskForm .AssignTaskSection .css-1tlcqt-MuiAutocomplete-root {
-  width: 100%;
-}
-.TaskForm .AssignTaskSection .css-1tlcqt-MuiAutocomplete-root .MuiAutocomplete-input {
-  text-align: center;
-}
-
-.AssignTaskSection .MuiInputBase-root {
-  height: 50px;
-  border-radius: 10px;
-  border: 1px solid var(--gray-300);
-}
-
-.AssignTaskSection .AutocompleteElement .MuiInputBase-input {
-  text-align: center;
-}
-
-.AutocompleteElement .MuiInputBase-input::placeholder {
-  color: var(--gray);
-  opacity: 1;
-}
 
 .AssignTaskSection .MuiAutocomplete-popper .MuiPaper-root {
   background-color: var(--light-color);
   color: var(--dark-color);
   border: 1px solid var(--dark-color);
-}
+} 
 
-/* Autocomplete input text color */
 .AssignTaskSection
   .css-1w98mmc-MuiAutocomplete-root
   .MuiOutlinedInput-root
   .MuiAutocomplete-input {
   color: var(--dark-color);
-}
-
-.TaskForm .TaskPriority .PrioritySelect,
-.TaskForm .Status .EditStatusSelect {
-  padding: 5px;
-  border: 1px solid var(--gray-300);
-  outline: none;
-  border-radius: 10px;
-  text-align: center;
-  height: 50px;
-  width: 100%;
-  color: var(--gray);
-}
-
-.TaskForm .PrioritySelect span {
-  color: #9CA3AF;
-}
-
-/* Menu paper & native select overrides (note: hash classes can change across builds) */
-.css-1toxriw-MuiList-root-MuiMenu-list {
-  background-color: var(--lightWhite-color);
-  color: var(--dark-color);
-}
-
-.css-18jp67o-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input.css-18jp67o-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input.css-18jp67o-MuiNativeSelect-root-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input {
-  color: var(--dark-color);
-}
-
-.TaskForm .Deadline div.MuiPickersInputBase-root {
-  max-width: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  height: 50px;
-  border-radius: 10px;
-  border: 1px solid var(--gray-300);
-}
-
-.TaskForm .Deadline div.MuiPickersSectionList-root {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.Deadline .MuiPickersSectionList-root,
-.Deadline .MuiInputBase-input {
-  color: #9CA3AF;
-  opacity: 1;
-}
-
-.Deadline.has-value .MuiPickersSectionList-root,
-.Deadline.has-value .MuiInputBase-input {
-  color: var(--dark-color);
-}
-
-.Deadline .MuiInputBase-input::placeholder {
-  color: #9CA3AF;
-  opacity: 1;
-}
-
-/* Date calendar popup (hash classes are brittle—prefer stable MUI classes when possible) */
-.css-5wchs2-MuiDateCalendar-root {
-  background-color: var(--lightWhite-color);
-  color: var(--dark-color) !important;
-}
-
-.css-5wchs2-MuiDateCalendar-root,
-.css-14yom7c-MuiSvgIcon-root-MuiPickersCalendarHeader-switchViewIcon,
-.css-1ckov0h-MuiSvgIcon-root,
-.css-17f9e7e-MuiTypography-root-MuiDayCalendar-weekDayLabel,
-.css-4k4mmf-MuiButtonBase-root-MuiPickersDay-root {
-  color: var(--dark-color) !important;
-}
-
-.css-qct7wd-MuiButtonBase-root-MuiPickersDay-root:not(.Mui-selected) {
-  border-color: var(--dark-color) !important;
-  color: var(--dark-color);
-}
+} 
 
 .TaskForm .submit-btn {
   padding: 5px 10px;
@@ -251,16 +102,11 @@
   color: var(--lightWhite-color);
 }
 
-.TaskForm .AssignTaskSection .css-1umw9bq-MuiSvgIcon-root,
-.TaskForm .Deadline .css-1umw9bq-MuiSvgIcon-root,
-.TaskForm .Status .css-1rfqz7c-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon,
-.TaskForm .TaskPriority .css-1rfqz7c-MuiSvgIcon-root-MuiNativeSelect-root-MuiSelect-icon {
-  color: var(--gray) !important;
-}
-
 @media (max-width: 1024px) {
   .TaskForm {
     border-radius: 10px;
+    width: 90%;
+    padding: 40px 30px 40px;
   }
 
   .TaskForm .submit-btn {
@@ -273,7 +119,6 @@
     width: 100%;
   }
 
-  .TaskForm .AssignTaskSection label,
   .TaskForm .TaskSubject label,
   .TaskForm .Deadline label,
   .TaskForm .TaskDescription label,
@@ -281,16 +126,6 @@
   .TaskForm .Status label {
     width: 100%;
     font-size: 0.9rem;
-  }
-
-  .TaskForm .AssignTaskSection .AutocompleteElement,
-  .TaskForm .TaskSubject .TaskSubjectInput,
-  .TaskForm .Deadline .DeadlineInput,
-  .TaskForm .TaskDescription .TaskDescriptionInput,
-  .TaskForm .TaskPriority .PrioritySelect,
-  .TaskForm .Status .EditStatusSelect {
-    font-size: 0.9rem;
-    width: 100%;
   }
 }
 

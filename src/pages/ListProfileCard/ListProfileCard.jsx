@@ -1,6 +1,6 @@
 import './ListProfileCard.css';
-import "../../components/SpecialHead/SpecialHead.css"
-import "../../components/Toolbar/Toolbar.css"
+import "../../components/SpecialHead/SpecialHead.css";
+import "../../components/Toolbar/Toolbar.css";
 
 import ProfileCard from '../../components/ProfileCard/ProfileCard';
 import SpecialHead from '../../components/SpecialHead/SpecialHead';
@@ -8,26 +8,38 @@ import Toolbar from '../../components/Toolbar/Toolbar';
 import LoadMoreButton from "../../components/LoadMoreButton/LoadMoreButton";
 import FallBack from '../../components/FallBack/FallBack';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 function ListProfileCard() {
   const profiles = useSelector((state) => state.auth.profiles);
+  const { currentUser } = useSelector((state) => state.auth);
 
-  const [filtered, setFiltered] = useState(profiles);
   const [visibleCount, setVisibleCount] = useState(3);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  function filterData(value) {
-    const search = value.toLowerCase();
-    setFiltered(
-      profiles.filter(item =>
-        item?.name?.toLowerCase()?.includes(search)
-      )
+  const orderedProfiles = useMemo(() => {
+    if (!currentUser) return profiles;
+
+    const currentProfile = profiles.find(p => String(p.id) === String(currentUser.id));
+    const otherProfiles = profiles.filter(p => String(p.id) !== String(currentUser.id));
+
+    return currentProfile ? [currentProfile, ...otherProfiles] : profiles;
+  }, [profiles, currentUser]);
+
+  const filtered = useMemo(() => {
+    const search = searchTerm.toLowerCase();
+    return orderedProfiles.filter(item =>
+      item?.name?.toLowerCase()?.includes(search)
     );
-    setVisibleCount(3);
-  }
+  }, [orderedProfiles, searchTerm]);
 
   const currentProfiles = filtered.slice(0, visibleCount);
+
+  function filterData(value) {
+    setSearchTerm(value);
+    setVisibleCount(3);
+  }
 
   return (
     <section id="ListProfileCard">
@@ -41,11 +53,6 @@ function ListProfileCard() {
               <ProfileCard
                 key={profile.id}
                 id={profile.id}
-                name={profile.name}
-                job={profile.job}
-                img={profile.image}
-                phone={profile.phone}
-                email={profile.email}
               />
             ))
           ) : (

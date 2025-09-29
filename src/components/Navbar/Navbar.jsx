@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/auth/authSlice";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
 
 function Navbar() {
   const dispatch = useDispatch();
@@ -18,14 +19,15 @@ function Navbar() {
   };
 
   const navItems = [
-    { name: "Profiles", path: "/ListProfileCards" },
+    { name: "Profiles", path: "/listProfileCards" },
     { name: "Tasks", path: "/tasks" },
+    { name: "Dashboard", path: "/dashboard" },
   ];
 
   return (
     <header id="header">
       <div className="container">
-        <Link to="/ListProfileCards">
+        <Link to="/dashboard">
           <h2>Taskify</h2>
         </Link>
 
@@ -45,22 +47,75 @@ function Navbar() {
           <Tooltip
             title="Toggle theme"
             placement="bottom"
+            disableInteractive
+            arrow
+            componentsProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--dark-color)",
+                  color: "var(--white-color)",
+                  fontSize: "0.8rem",
+                },
+              },
+              arrow: {
+                sx: {
+                  color: "var(--dark-color)",
+                },
+              },
+            }}
           >
-            <div>
+            <IconButton
+              size="small"
+              sx={{
+                color: "inherit",
+                padding: 0,
+                width: "auto",
+                height: "auto",
+              }}
+            >
               <ThemeToggle />
-            </div>
+            </IconButton>
           </Tooltip>
 
           {isAuthenticated && (
             <Tooltip
               title="Logout"
               placement="bottom"
+              disableInteractive
+              arrow
+              componentsProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--dark-color)",
+                    color: "var(--white-color)",
+                    fontSize: "0.8rem",
+                  },
+                },
+                arrow: {
+                  sx: {
+                    color: "var(--dark-color)",
+                  },
+                },
+              }}
             >
-              <LogoutIcon
-                className="logout-icon"
-                sx={{ cursor: "pointer" }}
+              <IconButton
+                size="small"
                 onClick={handleLogout}
-              />
+                sx={{
+                  color: "inherit",
+                  padding: 0,
+                  width: "auto",
+                  height: "auto",
+                }}
+              >
+                <LogoutIcon
+                  className="logout-icon"
+                  sx={{
+                    cursor: "pointer",
+                    "&:hover": { color: "var(--main-color)" },
+                  }}
+                />
+              </IconButton>
             </Tooltip>
           )}
         </div>

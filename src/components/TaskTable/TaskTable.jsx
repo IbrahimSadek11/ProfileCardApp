@@ -4,7 +4,7 @@ import CreateBtn from "../Create-Btn/Create-Btn";
 import { Link, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { removed } from "../../features/tasks/tasksSlice";
-import { IconButton, Menu, Chip, Button, Box, Select, MenuItem, FormLabel, TextField, Pagination, Tooltip } from "@mui/material";
+import { IconButton, Menu, Chip, Button, Box, Select, MenuItem, FormLabel, TextField, Pagination, Tooltip, } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -39,8 +39,18 @@ function TaskTable() {
 
   const applyFilter = () => {
     if (field && pendingValue) {
-      setAppliedFilter({ field, value: pendingValue });
-      setPage(1);
+      if (field === "id" && pendingValue.trim() === "") {
+        toast.error("⚠️ Please enter a valid Task ID", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+      } else {
+        setAppliedFilter({
+          field,
+          value: field === "id" ? pendingValue.trim() : pendingValue,
+        });
+        setPage(1);
+      }
     } else {
       setAppliedFilter({ field: "", value: "" });
     }
@@ -58,6 +68,10 @@ function TaskTable() {
     dispatch(removed(id));
     toast.success(`🗑️ Task deleted successfully!`);
   };
+
+  if (currentUser?.role === "user" && id && String(currentUser.id) !== String(id)) {
+    return <FallBack message="⛔ Access denied: You cannot view other users' tasks." />;
+  }
 
   const roleFilteredTasks = tasks.filter((task) => {
     if (currentUser?.role === "user") {
@@ -86,7 +100,7 @@ function TaskTable() {
     if (appliedFilter.field === "date") {
       return task.date === appliedFilter.value;
     }
-    if (!id && appliedFilter.field === "assignee") {
+    if (currentUser?.role !== "user" && !id && appliedFilter.field === "assignee") {
       return String(task.assigneeId) === String(appliedFilter.value);
     }
     return true;
@@ -102,27 +116,30 @@ function TaskTable() {
         <Box>
           <label className="Filter">Select Filter :</label>
           <Tooltip title="Filter">
-            <IconButton onClick={handleToggle} color="primary">
+            <IconButton onClick={handleToggle}>
               <FilterListIcon />
             </IconButton>
           </Tooltip>
 
           {appliedFilter.field && (
-          <Chip
-            label={
-              appliedFilter.field === "assignee"
-                ? `Assignee: ${profiles.find((p) => String(p.id) === String(appliedFilter.value))?.name || appliedFilter.value}`
-                : `${appliedFilter.field}: ${appliedFilter.value}`
-            }
-            onDelete={clearFilter}
-            variant="outlined"
-            className="chip"
+            <Chip
+              label={
+                appliedFilter.field === "assignee"
+                  ? `Assignee: ${
+                      profiles.find((p) => String(p.id) === String(appliedFilter.value))?.name ||
+                      appliedFilter.value
+                    }`
+                  : `${appliedFilter.field}: ${appliedFilter.value}`
+              }
+              onDelete={clearFilter}
+              variant="outlined"
+              className="chip"
             />
           )}
         </Box>
 
-        {(currentUser?.role === "admin" || currentUser?.role === "user") && !id && (
-          <CreateBtn navigate="/Task/Create" />
+        {(currentUser?.role === "admin" || currentUser?.role === "user") && (
+          <CreateBtn navigate="/tasks/Create" />
         )}
       </div>
 
@@ -149,7 +166,9 @@ function TaskTable() {
           >
             <MenuItem value="">Select Column</MenuItem>
             <MenuItem value="id">ID</MenuItem>
-            {!id && <MenuItem value="assignee">Assignee</MenuItem>}
+            {currentUser?.role !== "user" && !id && (
+              <MenuItem value="assignee">Assignee</MenuItem>
+            )}
             <MenuItem value="priority">Priority</MenuItem>
             <MenuItem value="status">Status</MenuItem>
             <MenuItem value="date">Deadline</MenuItem>
@@ -200,7 +219,7 @@ function TaskTable() {
             />
           )}
 
-          {!id && field === "assignee" && (
+          {currentUser?.role !== "user" && !id && field === "assignee" && (
             <Select
               value={pendingValue}
               onChange={(e) => setPendingValue(e.target.value)}
@@ -263,11 +282,12 @@ function TaskTable() {
                     </span>
                   </td>
                   <td>
-                    {(currentUser?.role === "admin" || String(task.assigneeId) === String(currentUser.id)) && (
+                    {(currentUser?.role === "admin" ||
+                      String(task.assigneeId) === String(currentUser.id)) && (
                       <Tooltip title="Edit">
                         <IconButton
                           component={Link}
-                          to={`/Task/Edit/${task.id}`}
+                          to={`/tasks/Edit/${task.id}`}
                           className="edit-btn"
                         >
                           <EditIcon />
@@ -295,6 +315,7 @@ function TaskTable() {
           </tbody>
         </table>
       </div>
+
       {pageCount > 1 && (
         <Box display="flex" justifyContent="center" mt={2}>
           <Pagination
