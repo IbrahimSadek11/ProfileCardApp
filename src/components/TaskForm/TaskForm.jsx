@@ -31,18 +31,18 @@ const schema = yup.object({
     .trim("No leading/trailing spaces allowed")
     .strict(true)
     .required("Required")
-    .min(3, "Min 3 chars")
     .matches(/\S/, "Cannot be only spaces")
-    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row"),
+    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row")
+    .min(3, "Min 3 chars"),
 
   description: yup
     .string()
     .trim("No leading/trailing spaces allowed")
     .strict(true)
     .required("Required")
-    .min(10, "Min 10 chars")
     .matches(/\S/, "Cannot be only spaces")
-    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row"),
+    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row")
+    .min(10, "Min 10 chars"),
 
   assigneeId: yup.mixed().required("Required"),
   priority: yup.string().required("Required").oneOf(PRIORITIES),
@@ -410,7 +410,6 @@ function TaskForm() {
                       },
                     },
                     popper: {
-                      placement: "top-start",
                       sx: {
                         zIndex: 10,
                         "& .MuiPaper-root": {

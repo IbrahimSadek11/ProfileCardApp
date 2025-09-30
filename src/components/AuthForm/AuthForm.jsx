@@ -19,9 +19,34 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const signupSchema = yup.object().shape({
-  name: yup.string().required("Name is required"),
-  email: yup.string().required("Email is required").email("Invalid email"),
-  password: yup.string().required("Password is required"),
+  name: yup
+    .string()
+    .trim("No leading or trailing spaces allowed")
+    .strict(true)
+    .required("Name is required")
+    .matches(/\S/, "Name cannot be only spaces")
+    .matches(/^[A-Za-z\s]+$/, "Name must only contain letters and spaces")
+    .matches(/^[A-Z]/, "Name must start with an uppercase letter")
+    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row")
+    .min(6, "Name must be at least 6 characters")
+    .max(30, "Name cannot be longer than 30 characters"),
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Invalid email format")
+    .matches(
+      /^[\w.-]+@([\w-]+\.)+(com|net|org|edu)$/,
+      "Email must end with .com, .net, .org, or .edu"
+    ),
+  password: yup
+    .string()
+    .required("Password is required")
+    .matches(/^\S+$/, "No spaces allowed")
+    .matches(/[a-z]/, "Must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "Must contain at least one uppercase letter")
+    .matches(/[0-9]/, "Must contain at least one number")
+    .matches(/[@$!%*?&]/, "Must contain at least one special character (@, $, !, %, *, ?, &)")
+    .min(8, "Min 8 characters"),
   confirmPassword: yup
     .string()
     .required("Confirm your password")
@@ -29,7 +54,11 @@ const signupSchema = yup.object().shape({
 });
 
 const loginSchema = yup.object().shape({
-  email: yup.string().required("Email is required").email("Invalid email"),
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Invalid email")    
+    .matches(/^[\w.-]+@([\w-]+\.)+(com|net|org|edu)$/,"Email must end with .com, .net, .org, or .edu"),
   password: yup.string().required("Password is required"),
 });
 

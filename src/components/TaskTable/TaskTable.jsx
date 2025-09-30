@@ -10,6 +10,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { toast } from "react-toastify";
 import FallBack from "../../components/FallBack/FallBack";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import { useEffect } from "react";
 
 function TaskTable() {
   const { id } = useParams();
@@ -69,10 +74,6 @@ function TaskTable() {
     toast.success(`🗑️ Task deleted successfully!`);
   };
 
-  if (currentUser?.role === "user" && id && String(currentUser.id) !== String(id)) {
-    return <FallBack message="⛔ Access denied: You cannot view other users' tasks." />;
-  }
-
   const roleFilteredTasks = tasks.filter((task) => {
     if (currentUser?.role === "user") {
       return String(task.assigneeId) === String(currentUser.id);
@@ -109,6 +110,16 @@ function TaskTable() {
   const startIndex = (page - 1) * rowsPerPage;
   const paginatedTasks = fullyFilteredTasks.slice(startIndex, startIndex + rowsPerPage);
   const pageCount = Math.ceil(fullyFilteredTasks.length / rowsPerPage);
+  
+  useEffect(() => {
+    if (page > pageCount) {
+      setPage(pageCount > 0 ? pageCount : 1);
+    }
+  }, [page, pageCount]);
+
+  if (currentUser?.role === "user" && id && String(currentUser.id) !== String(id)) {
+    return <FallBack message="⛔ Access denied: You cannot view other users' tasks." />;
+  }
 
   return (
     <div className="task-table-section">
@@ -211,12 +222,76 @@ function TaskTable() {
           )}
 
           {field === "date" && (
-            <TextField
-              type="date"
-              value={pendingValue}
-              onChange={(e) => setPendingValue(e.target.value)}
-              size="small"
-            />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                value={pendingValue ? dayjs(pendingValue) : null}
+                onChange={(newVal) =>
+                  setPendingValue(newVal ? newVal.format("YYYY-MM-DD") : "")
+                }
+                format="YYYY-MM-DD"
+                slotProps={{
+                  textField: {
+                    placeholder: "YYYY-MM-DD",
+                    fullWidth: true,
+                    variant: "standard",
+                    sx: {
+                      "& .MuiPickersInputBase-root": {
+                        height: "50px",
+                        border: `1px solid var(--gray-300)`,
+                        borderRadius: "5px",
+                        backgroundColor: "var(--lightWhite-color)",
+                        display: "flex",
+                        alignItems: "center",
+                      },
+                      "& .MuiPickersInputBase-root:before, & .MuiPickersInputBase-root:after": {
+                        borderBottom: "none !important",
+                      },
+                      "& .MuiPickersSectionList-root": {
+                        borderBottom: "none !important",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color:"var(--dark-color)",
+                        opacity: 1,
+                        height: "100%",
+                      },
+                      "& .MuiPickersSection-root": {
+                        display: "flex",
+                        alignItems: "center",
+                      },
+                      "& .MuiIconButton-root": {
+                        color: "var(--dark-color)",
+                      },
+                    },
+                  },
+                  popper: {
+                    sx: {
+                      "& .MuiPaper-root": {
+                        backgroundColor: "var(--lightWhite-color)",
+                        color: "var(--dark-color)",
+                        borderRadius: "10px",
+                        border: "1px solid var(--gray-300)",
+                      },
+                      "& .MuiPickersDay-root": {
+                        color: "var(--dark-color)",
+                        borderRadius: "8px",
+                      },
+                      "& .MuiPickersDay-root:not(.Mui-selected)": {
+                        borderColor: "var(--dark-color)",
+                      },
+                      "& .MuiPickersDay-root.Mui-selected": {
+                        backgroundColor: "var(--main-color)",
+                        color: "var(--white-color)",
+                        "&:hover": { backgroundColor: "var(--main-color-alt)" },
+                      },
+                      "& .MuiDayCalendar-weekDayLabel": { color: "var(--dark-color)" },
+                      "& .MuiPickersCalendarHeader-label": { color: "var(--dark-color)" },
+                      "& .MuiIconButton-root": { color: "var(--dark-color)" },
+                    },
+                  },
+                }}
+              />
+            </LocalizationProvider>
           )}
 
           {currentUser?.role !== "user" && !id && field === "assignee" && (
