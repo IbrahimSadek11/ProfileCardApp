@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
@@ -9,21 +9,11 @@ function Dashboard() {
   const { currentUser, profiles } = useSelector((s) => s.auth);
   const tasks = useSelector((s) => s.tasks.items);
 
-  const [selectedAssignee, setSelectedAssignee] = useState(null);
-
   let userTasks;
   if (currentUser?.role === "admin") {
-    if (selectedAssignee) {
-      userTasks = tasks.filter(
-        (t) => String(t.assigneeId) === String(selectedAssignee)
-      );
-    } else {
-      userTasks = tasks;
-    }
+    userTasks = tasks;
   } else {
-    userTasks = tasks.filter(
-      (t) => String(t.assigneeId) === String(currentUser.id)
-    );
+    userTasks = tasks.filter((t) => String(t.assigneeId) === String(currentUser.id));
   }
 
   const intervals = [
@@ -45,60 +35,38 @@ function Dashboard() {
       return t.date >= interval.start && t.date < interval.end;
     });
 
-    seriesData.pending.push(
-      tasksInInterval.filter((t) => t.status === "Pending").length
-    );
-    seriesData.inProgress.push(
-      tasksInInterval.filter((t) => t.status === "In Progress").length
-    );
-    seriesData.completed.push(
-      tasksInInterval.filter((t) => t.status === "Completed").length
-    );
-    seriesData.rejected.push(
-      tasksInInterval.filter((t) => t.status === "Rejected").length
-    );
+    seriesData.pending.push(tasksInInterval.filter((t) => t.status === "Pending").length);
+    seriesData.inProgress.push(tasksInInterval.filter((t) => t.status === "In Progress").length);
+    seriesData.completed.push(tasksInInterval.filter((t) => t.status === "Completed").length);
+    seriesData.rejected.push(tasksInInterval.filter((t) => t.status === "Rejected").length);
   });
 
   const pendingCount = userTasks.filter((t) => t.status === "Pending").length;
-  const inProgressCount = userTasks.filter(
-    (t) => t.status === "In Progress"
-  ).length;
-  const completedCount = userTasks.filter(
-    (t) => t.status === "Completed"
-  ).length;
-  const rejectedCount = userTasks.filter(
-    (t) => t.status === "Rejected"
-  ).length;
+  const inProgressCount = userTasks.filter((t) => t.status === "In Progress").length;
+  const completedCount = userTasks.filter((t) => t.status === "Completed").length;
+  const rejectedCount = userTasks.filter((t) => t.status === "Rejected").length;
 
-  const categories = ["Pending", "In Progress", "Completed", "Rejected"];
-  const values = [
-    pendingCount,
-    inProgressCount,
-    completedCount,
-    rejectedCount,
-  ];
-  const statusColors = [
-    "var(--status-pending)",
-    "var(--status-inprogress)",
-    "var(--status-completed)",
-    "var(--status-rejected)",
-  ];
+  const lowCount = userTasks.filter((t) => t.priority === "Low").length;
+  const mediumCount = userTasks.filter((t) => t.priority === "Medium").length;
+  const highCount = userTasks.filter((t) => t.priority === "High").length;
 
-  const piePalette = [
-    "#2196f3", "#1787e0", "#4caf50", "#ff9800", "#f44336",
-    "#9c27b0", "#00bcd4", "#8bc34a", "#ff5722", "#795548",
-    "#3f51b5", "#009688"
-  ];
+  const statusCategories = ["Pending", "In Progress", "Completed", "Rejected"];
+  const statusValues = [ pendingCount, inProgressCount, completedCount, rejectedCount, ];
+  const statusColors = [ "var(--status-pending)", "var(--status-inprogress)", "var(--status-completed)", "var(--status-rejected)", ];
+
+  const priorityCategories = ["Low", "Medium", "High"];
+  const priorityValues = [lowCount, mediumCount, highCount];
+  const priorityColors = [ "#4caf50", "#ff9800", "#f44336", ];
+  const piePalette = [ "#2196f3", "#1787e0", "#4caf50", "#ff9800", "#f44336", "#9c27b0", "#00bcd4", "#8bc34a", "#ff5722", "#795548", "#3f51b5", "#009688" ];
 
   const lineOptions = {
     chart: { type: "line", backgroundColor: "transparent", height: 300 },
     title: {
-      text: selectedAssignee
-        ? `📈 Task Timeline of ${
-            profiles.find((p) => String(p.id) === String(selectedAssignee))?.name
-          }`
-        : "📈 Task Status Timeline",
-      style: { color: "var(--main-color)" },
+      text: "Task Status Timeline",
+      align: "left",
+      x: 25,
+      y: 5,
+      style: { color: "var(--main-color)", },
     },
     xAxis: {
       categories: intervals.map((i) => i.label),
@@ -110,17 +78,9 @@ function Dashboard() {
     },
     tooltip: { shared: true, valueSuffix: " tasks" },
     legend: {
-      itemStyle: {
-        color: "var(--dark-color)", 
-        fontWeight: "bold",     
-      },
-      itemHoverStyle: {
-        color: "#9CA3AF",                   
-      },
-      itemHiddenStyle: {
-        color: "#9CA3AF",        
-        textDecoration: "line-through",  
-      }
+      itemStyle: { color: "var(--dark-color)", fontWeight: "bold" },
+      itemHoverStyle: { color: "#9CA3AF" },
+      itemHiddenStyle: { color: "#9CA3AF", textDecoration: "line-through" },
     },
     series: [
       { name: "Pending", data: seriesData.pending, color: "var(--status-pending)" },
@@ -133,30 +93,17 @@ function Dashboard() {
   const columnOptions = {
     chart: { type: "column", backgroundColor: "transparent", height: 300 },
     title: {
-      text: selectedAssignee
-        ? `📊 Tasks by Status for ${
-            profiles.find((p) => String(p.id) === String(selectedAssignee))?.name
-          }`
-        : "📊 Tasks by Status",
+      text: "Tasks by Priority",
+      align: "left",
       style: { color: "var(--main-color)" },
     },
-    xAxis: { categories, labels: { style: { color: "var(--dark-color)" } } },
+    xAxis: { categories: priorityCategories, labels: { style: { color: "var(--dark-color)" } } },
     yAxis: { title: { text: "Tasks", style: { color: "var(--dark-color)" } }, labels: { style: { color: "var(--dark-color)" } } },
     tooltip: { valueSuffix: " tasks" },
-    legend: {
-      itemStyle: {
-        color: "var(--dark-color)",      
-        fontWeight: "bold",
-      },
-      itemHoverStyle: {
-        color: "#9CA3AF",                  
-      },
-      itemHiddenStyle: {
-        color: "var(--dark-color)",        
-        textDecoration: "line-through",  
-      }
-    },
-    series: [{ name: "Tasks", data: values, colorByPoint: true, colors: statusColors }],
+    legend: { enabled: false },
+    series: [
+      { name: "Tasks", data: priorityValues, colorByPoint: true, colors: priorityColors }
+    ],
   };
 
   let pieData;
@@ -173,9 +120,9 @@ function Dashboard() {
       })
       .filter((d) => d.y > 0);
   } else {
-    pieData = categories.map((c, i) => ({
+    pieData = statusCategories.map((c, i) => ({
       name: c,
-      y: values[i],
+      y: statusValues[i],
       color: statusColors[i],
     }));
   }
@@ -185,29 +132,16 @@ function Dashboard() {
     title: {
       text:
         currentUser?.role === "admin"
-          ? "🍩 Task Distribution by Assignee"
-          : "🍩 Task Distribution by Status",
+          ? "Task Distribution by Assignee"
+          : "Task Distribution by Status",
+      align: "left",
       style: { color: "var(--main-color)" },
     },
     tooltip: { pointFormat: "<b>{point.percentage:.1f}%</b> ({point.y} tasks)" },
     plotOptions: {
       pie: {
-        allowPointSelect: currentUser?.role === "admin",
-        cursor: currentUser?.role === "admin" ? "pointer" : "default",
-        point: {
-          events:
-            currentUser?.role === "admin"
-              ? {
-                  click: function () {
-                    if (selectedAssignee === this.id) {
-                      setSelectedAssignee(null);
-                    } else {
-                      setSelectedAssignee(this.id);
-                    }
-                  },
-                }
-              : {},
-        },
+        allowPointSelect: false,
+        cursor: "default",
       },
     },
     series: [
@@ -222,7 +156,9 @@ function Dashboard() {
   return (
     <section id="Dashboard">
       <div className="container">
-        <SpecialHead Heading="📊 Dashboard"/>
+        <div className="Adjusted-Title">
+          <SpecialHead Heading="Dashboard"/>
+        </div>
         <div className="chart-full">
           <HighchartsReact highcharts={Highcharts} options={lineOptions} />
         </div>

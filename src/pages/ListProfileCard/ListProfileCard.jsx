@@ -44,7 +44,9 @@ function ListProfileCard() {
   return (
     <section id="ListProfileCard">
       <div className="container">
-        <SpecialHead Heading="Profiles" />
+        <div className="Adjusted-Title">
+          <SpecialHead Heading="Profiles"/>
+        </div>
         <Toolbar ArrayName="Profiles" Array={filtered} onFilter={filterData} /> 
 
         <div className="row">

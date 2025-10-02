@@ -18,6 +18,12 @@
 .chart-full {
   width: 100%;
   min-height: 370px;
+  border: 1px solid var(--gray-300);  
+  border-radius: 10px;                
+  padding: 15px;                      
+  background-color: var(--white-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;           
 }
 
 .charts-row {
@@ -33,6 +39,12 @@
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
+  border: 1px solid var(--gray-300); 
+  border-radius: 10px;               
+  padding: 15px;                     
+  background-color: var(--white-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;           
 }
 
 .highcharts-container {
@@ -53,3 +65,4 @@
     grid-template-columns: 1fr;
   }
 }
+

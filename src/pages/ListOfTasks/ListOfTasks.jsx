@@ -5,16 +5,26 @@ import './ListOfTasks.css';
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import FallBack from "../../components/FallBack/FallBack";
+import NotFound from "../NotFound/NotFound";
 
 function ListOfTasks() {
   const { currentUser, profiles } = useSelector((s) => s.auth);
   const { id } = useParams();
 
-  let headingText = "Tasks";
+  if (currentUser?.role === "user" && id && String(currentUser.id) !== String(id)) {
+    return (
+      <section id="ListOfTasks">
+        <div className="container">
+          <FallBack message="Access denied: you can't access this page." />
+        </div>
+      </section>
+    );
+  }
 
+  let headingText;
+  
   if (currentUser?.role === "user") {
-    const profile = profiles.find((p) => String(p.id) === String(currentUser.id));
-    headingText = `Tasks of ${profile.name}`;
+    headingText = `My Tasks`;
   } else if (currentUser?.role === "admin") {
     if (id) {
       const profile = profiles.find((p) => String(p.id) === String(id));
@@ -22,7 +32,7 @@ function ListOfTasks() {
         return (
           <section id="ListOfTasks">
             <div className="container">
-              <FallBack message="❌ This profile does not exist" />
+              <NotFound message="This profile does not exist" />
             </div>
           </section>
         );
@@ -36,7 +46,9 @@ function ListOfTasks() {
   return (
     <section id="ListOfTasks">
       <div className="container">
-        <SpecialHead Heading={headingText} />
+        <div className="Adjusted-Title">
+            <SpecialHead Heading={headingText} /> 
+        </div>
         <TaskTable />
       </div>
     </section>

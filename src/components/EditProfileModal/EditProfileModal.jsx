@@ -21,7 +21,7 @@ import * as yup from "yup";
       .trim("No leading or trailing spaces allowed")
       .strict(true)
       .required("Job is required")
-      .min(2, "Job must be at least 3 characters")
+      .min(3, "Job must be at least 3 characters")
       .max(40, "Job cannot exceed 40 characters")
       .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row"),
     phone: yup
@@ -37,7 +37,6 @@ import * as yup from "yup";
 function EditProfileModal({ open, handleClose, profile }) {
   const dispatch = useDispatch();
 
-  // Convert uploaded file into Base64 so it persists after refresh
   const toBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -56,7 +55,7 @@ function EditProfileModal({ open, handleClose, profile }) {
     resolver: yupResolver(schema),
     defaultValues: {
       name: profile?.name || "",
-      job: profile?.job || "",
+      job: profile?.job === "unknown position" ? "" : profile?.job || "", 
       phone: profile?.phone || "",
       email: profile?.email || "",
       image: profile?.image || "",
@@ -66,17 +65,18 @@ function EditProfileModal({ open, handleClose, profile }) {
   useEffect(() => {
     reset({
       name: profile?.name || "",
-      job: profile?.job || "",
+      job: profile?.job === "unknown position" ? "" : profile?.job || "",
       phone: profile?.phone || "",
       email: profile?.email || "",
       image: profile?.image || "",
     });
   }, [profile, reset]);
 
+
   const handleChangeImage = async (e) => {
     if (e.target.files?.[0]) {
       const base64 = await toBase64(e.target.files[0]);
-      setValue("image", base64, { shouldValidate: false });
+      setValue("image", base64);
     }
   };
 
@@ -119,7 +119,6 @@ function EditProfileModal({ open, handleClose, profile }) {
             gap: 3,
           }}
         >
-
           <Box
             sx={{
               flex: { xs: "unset", md: "1 1 200px" },
@@ -173,42 +172,6 @@ function EditProfileModal({ open, handleClose, profile }) {
               gap: 2,
             }}
           >
-            {["name", "job", "phone"].map((field) => (
-              <Controller
-                key={field}
-                name={field}
-                control={control}
-                render={({ field: controllerField }) => (
-                  <TextField
-                    {...controllerField}
-                    label={field.charAt(0).toUpperCase() + field.slice(1)}
-                    fullWidth
-                    error={!!errors[field]}
-                    helperText={errors[field]?.message}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        color: "var(--dark-color)",
-                        "& input": {
-                          color: "var(--dark-color)", 
-                        },
-                        "& fieldset": { borderColor: "var(--gray-300)" },
-                        "&:hover fieldset": { borderColor: "var(--main-color)" },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "var(--main-color-alt)",
-                        },
-                      },
-                      "& .MuiInputLabel-root": {
-                        color: "var(--gray)",
-                      },
-                      "& .MuiInputLabel-root.Mui-focused": {
-                        color: "var(--main-color)",
-                      },
-                    }}
-                  />
-                )}
-              />
-            ))}
-
             <Controller
               name="email"
               control={control}
@@ -236,6 +199,38 @@ function EditProfileModal({ open, handleClose, profile }) {
                 />
               )}
             />
+            
+          {["name", "job", "phone"].map((item) => (
+            <Controller
+              key={item}
+              name={item}
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={item.charAt(0).toUpperCase() + item.slice(1)}
+                  fullWidth
+                  error={!!errors[item]}
+                  helperText={errors[item]?.message}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      color: "var(--dark-color)",
+                      "& input": { color: "var(--dark-color)" },
+                      "& fieldset": { borderColor: "var(--gray-300)" },
+                      "&:hover fieldset": { borderColor: "var(--main-color)" },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "var(--main-color-alt)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": { color: "var(--gray)" },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "var(--main-color)",
+                    },
+                  }}
+                />
+              )}
+            />
+          ))}
           </Box>
         </Box>
 

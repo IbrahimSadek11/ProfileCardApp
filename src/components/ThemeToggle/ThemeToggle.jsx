@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./ThemeToggle.css";
 
-function ThemeToggle() {
+function ThemeToggle({children}) {
   const [darkMode, setDarkMode] = useState(false);
 
   const toggleTheme = () => setDarkMode(!darkMode);
@@ -17,6 +17,7 @@ function ThemeToggle() {
   return (
     <button className="theme-toggle" onClick={toggleTheme}>
       <i className={darkMode ? "fa-solid fa-sun" : "fa-solid fa-moon"}></i>
+      {children}
     </button>
   );
 }

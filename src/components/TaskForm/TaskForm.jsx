@@ -25,7 +25,7 @@ const PRIORITIES = ["Low", "Medium", "High"];
 const STATUSES = ["Pending", "In Progress", "Completed", "Rejected"];
 const today = dayjs().startOf("day");
 
-const schema = yup.object({
+const baseSchema = {
   name: yup
     .string()
     .trim("No leading/trailing spaces allowed")
@@ -47,6 +47,10 @@ const schema = yup.object({
   assigneeId: yup.mixed().required("Required"),
   priority: yup.string().required("Required").oneOf(PRIORITIES),
   status: yup.string().required("Required").oneOf(STATUSES),
+};
+
+const createSchema = yup.object({
+  ...baseSchema,
   date: yup
     .mixed()
     .required("Required")
@@ -57,6 +61,15 @@ const schema = yup.object({
       return d.isSame(today) || d.isAfter(today);
     }),
 });
+
+const editSchema = yup.object({
+  ...baseSchema,
+  date: yup
+    .mixed()
+    .required("Required")
+    .test("is-dayjs", "Select a date from the picker", (v) => dayjs.isDayjs(v) && v.isValid()),
+});
+
 
 
 function TaskForm() {
@@ -69,7 +82,7 @@ function TaskForm() {
   const navigate = useNavigate();
 
   const { control, handleSubmit, reset, formState: { errors } } = useForm({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(id ? editSchema : createSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -79,6 +92,7 @@ function TaskForm() {
       status: "Pending",
     },
   });
+
 
   const [notFound, setNotFound] = useState(false);
 
@@ -114,10 +128,10 @@ function TaskForm() {
 
     if (id) {
       dispatch(updated({ id, changes: taskData }));
-      toast.success("✅ Task updated successfully!");
+      toast.success("Task updated successfully!");
     } else {
       dispatch(added(taskData));
-      toast.success("✅ Task created successfully!");
+      toast.success("Task created successfully!");
     }
     navigate("/tasks");
   };
@@ -215,7 +229,6 @@ function TaskForm() {
         </div>
 
         <div className="form-group">
-          {currentUser?.role && (
             <div className="AssignTaskSection">
               <label>Assign task to</label>
               <Controller
@@ -300,7 +313,6 @@ function TaskForm() {
                 )}
               />
             </div>
-          )}
 
           <div className="TaskPriority">
             <label>Task Priority</label>

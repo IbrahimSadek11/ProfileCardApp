@@ -89,8 +89,8 @@ const authSlice = createSlice({
         const newProfile = {
           id: newId,
           name: userData.name,
-          job: userData.job || "unknown position",
-          phone: userData.phone || "unknown number",
+          job: "unknown position",
+          phone: "unknown number",
           email,
           image: require("../../assets/default.png"),
         };

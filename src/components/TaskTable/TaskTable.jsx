@@ -6,10 +6,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { removed } from "../../features/tasks/tasksSlice";
 import { IconButton, Menu, Chip, Button, Box, Select, MenuItem, FormLabel, TextField, Pagination, Tooltip, } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { toast } from "react-toastify";
-import FallBack from "../../components/FallBack/FallBack";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -45,10 +45,8 @@ function TaskTable() {
   const applyFilter = () => {
     if (field && pendingValue) {
       if (field === "id" && pendingValue.trim() === "") {
-        toast.error("⚠️ Please enter a valid Task ID", {
-          position: "top-right",
-          autoClose: 2000,
-        });
+        toast.error("Please enter a valid Task ID");
+        setPendingValue("");
       } else {
         setAppliedFilter({
           field,
@@ -69,9 +67,15 @@ function TaskTable() {
     setPage(1);
   };
 
+  const closeFilter = () => {
+    setField("");
+    setPendingValue("");
+    handleClose();
+  }
+
   const handleDelete = (id) => {
     dispatch(removed(id));
-    toast.success(`🗑️ Task deleted successfully!`);
+    toast.success(`Task deleted successfully!`);
   };
 
   const roleFilteredTasks = tasks.filter((task) => {
@@ -117,9 +121,6 @@ function TaskTable() {
     }
   }, [page, pageCount]);
 
-  if (currentUser?.role === "user" && id && String(currentUser.id) !== String(id)) {
-    return <FallBack message="⛔ Access denied: You cannot view other users' tasks." />;
-  }
 
   return (
     <div className="task-table-section">
@@ -148,10 +149,7 @@ function TaskTable() {
             />
           )}
         </Box>
-
-        {(currentUser?.role === "admin" || currentUser?.role === "user") && (
-          <CreateBtn navigate="/tasks/Create" />
-        )}
+        <CreateBtn navigate="/tasks/Create" />
       </div>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
@@ -164,7 +162,25 @@ function TaskTable() {
             gap: 2,
           }}
         >
-          <FormLabel>Filter by</FormLabel>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <FormLabel>Filter by</FormLabel>
+            <IconButton
+              size="small"
+              onClick={closeFilter}
+              sx={{
+                color: "var(--dark-color)",
+                "&:hover": { color: "var(--gray)" },
+              }}
+            >
+              <ClearIcon fontSize="small" />
+            </IconButton>
+          </Box>
 
           <Select
             sx={{ height: "40px" }}
@@ -294,7 +310,7 @@ function TaskTable() {
             </LocalizationProvider>
           )}
 
-          {currentUser?.role !== "user" && !id && field === "assignee" && (
+          {currentUser?.role !== "user" && field === "assignee" && (
             <Select
               value={pendingValue}
               onChange={(e) => setPendingValue(e.target.value)}
@@ -357,18 +373,16 @@ function TaskTable() {
                     </span>
                   </td>
                   <td>
-                    {(currentUser?.role === "admin" ||
-                      String(task.assigneeId) === String(currentUser.id)) && (
-                      <Tooltip title="Edit">
-                        <IconButton
-                          component={Link}
-                          to={`/tasks/Edit/${task.id}`}
-                          className="edit-btn"
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                    )}
+                    <Tooltip title="Edit">
+                      <IconButton
+                        component={Link}
+                       to={`/tasks/Edit/${task.id}`}
+                      className="edit-btn"
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    
                     <Tooltip title="Delete" sx={{ padding: "0px" }}>
                       <IconButton
                         onClick={() => handleDelete(task.id)}
@@ -383,7 +397,7 @@ function TaskTable() {
             ) : (
               <tr>
                 <td colSpan="8" className="Table-fallback">
-                  <FallBack message="No tasks found." />
+                  No Task Found.
                 </td>
               </tr>
             )}
