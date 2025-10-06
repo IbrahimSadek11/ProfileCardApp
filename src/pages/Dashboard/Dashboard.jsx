@@ -146,7 +146,7 @@ function Dashboard() {
     },
     series: [
       {
-        name: "Tasks",
+        name: "Tasks",  
         colorByPoint: true,
         data: pieData,
       },
