@@ -1,56 +1,46 @@
-import { createSlice } from "@reduxjs/toolkit";
-import initialProfiles from "../../data/Profile";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import api from "../../lib/api"; // axios instance with baseURL & interceptor (see file below)
 
-const initialUsers = [
-  {
-    id: "1",
-    email: "ibrahimsadeck1@gmail.com",
-    password: "Hakuna&123",
-    role: "admin",
-  },
-  {
-    id: "2",
-    email: "marwannajmeddine1@gmail.com",
-    password: "Hakuna&123",
-    role: "user",
-  },
-  {
-    id: "3",
-    email: "farhanabdelrahman@gmail.com",
-    password: "Hakuna&123",
-    role: "user",
-  },
-  {
-    id: "4",
-    email: "samerkhalil@gmail.com",
-    password: "Hakuna&123",
-    role: "user",
-  },
-  {
-    id: "5",
-    email: "alihassan@gmail.com",
-    password: "Hakuna&123",
-    role: "user",
-  },
-  {
-    id: "6",
-    email: "laithmansour@gmail.com",
-    password: "Hakuna&123",
-    role: "user",
-  },
-  {
-    id: "7",
-    email: "omarfakhry@gmail.com",
-    password: "Hakuna&123",
-    role: "user",
-  },
-];
+/**
+ * Auth thunks
+ */
+export const signup = createAsyncThunk(
+  "auth/signup",
+  async ({ name, email, password }, thunkAPI) => {
+    try {
+      const res = await api.post("/auth/signup", { name, email, password });
+      return res.data; // { id, email, role, token }
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data ||
+        "Signup failed. Please try again.";
+      return thunkAPI.rejectWithValue(msg);
+    }
+  }
+);
+
+export const login = createAsyncThunk(
+  "auth/login",
+  async ({ email, password }, thunkAPI) => {
+    try {
+      const res = await api.post("/auth/login", { email, password });
+      return res.data; // { id, email, role, token }
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data ||
+        "Invalid email or password.";
+      return thunkAPI.rejectWithValue(msg);
+    }
+  }
+);
 
 const initialState = {
-  users: initialUsers,      
-  profiles: initialProfiles,
-  currentUser: null,
+  currentUser: null,      // { id, email, role, token }
+  profiles: [],           // will be filled client-side or after fetch
   isAuthenticated: false,
+  loading: false,
   error: null,
 };
 
@@ -58,87 +48,78 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    signup: {
-      prepare({ confirmPassword, email, ...user }) {
-        return {
-          payload: {
-            email: email.toLowerCase(),
-            userData: user,
-          },
-        };
-      },
-      reducer(state, action) {
-        const { email, userData } = action.payload;
-
-        const exists = state.users.some((u) => u.email === email);
-        if (exists) {
-          state.error = "Email already taken.";
-          state.isAuthenticated = false;
-          return;
-        }
-
-        const newId = String(state.users.length + 1);
-
-        const newUser = {
-          id: newId,
-          role: "user",
-          email,
-          password: userData.password,
-        };
-
-        const newProfile = {
-          id: newId,
-          name: userData.name,
-          job: "unknown position",
-          phone: "unknown number",
-          email,
-          image: require("../../assets/default.png"),
-        };
-
-        state.users.push(newUser);
-        state.profiles.push(newProfile);
-
-        state.currentUser = newUser;
-        state.isAuthenticated = true;
-        state.error = null;
-      },
-    },
-
-    login: (state, action) => {
-      const email = action.payload.email.toLowerCase();
-      const { password } = action.payload;
-
-      const foundUser = state.users.find((u) => u.email === email && u.password === password);
-
-      if (foundUser) {
-        state.currentUser = foundUser;
-        state.isAuthenticated = true;
-        state.error = null;
-      } else {
-        state.currentUser = null;
-        state.isAuthenticated = false;
-        state.error = "Invalid email or password.";
-      }
-    },
-
-    logout: (state) => {
+    logout(state) {
       state.currentUser = null;
       state.isAuthenticated = false;
       state.error = null;
+      // also remove token from storage
+      try {
+        localStorage.removeItem("token");
+      } catch {}
     },
-
-    clearError: (state) => {
+    clearError(state) {
       state.error = null;
     },
-    updatedProfile: (state, action) => {
+    /**
+     * Keep this for your EditProfileModal
+     */
+    updatedProfile(state, action) {
       const { id, changes } = action.payload;
       const profile = state.profiles.find((p) => String(p.id) === String(id));
-      if (profile) {
-        Object.assign(profile, changes);
-      }
+      if (profile) Object.assign(profile, changes);
     },
+    /**
+     * Seed/replace profiles (optional helper if you load them elsewhere)
+     */
+    setProfiles(state, action) {
+      state.profiles = action.payload || [];
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      // signup
+      .addCase(signup.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(signup.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentUser = action.payload;
+        state.isAuthenticated = true;
+        try {
+          if (action.payload?.token) {
+            localStorage.setItem("token", action.payload.token);
+          }
+        } catch {}
+      })
+      .addCase(signup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.isAuthenticated = false;
+      })
+
+      // login
+      .addCase(login.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(login.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentUser = action.payload;
+        state.isAuthenticated = true;
+        try {
+          if (action.payload?.token) {
+            localStorage.setItem("token", action.payload.token);
+          }
+        } catch {}
+      })
+      .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.isAuthenticated = false;
+      });
   },
 });
 
-export const { signup, login, logout, clearError, updatedProfile } = authSlice.actions;
+export const { logout, clearError, updatedProfile, setProfiles } = authSlice.actions;
 export default authSlice.reducer;

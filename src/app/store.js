@@ -6,9 +6,14 @@ import storage from "redux-persist/lib/storage";
 import { persistReducer, persistStore } from "redux-persist";
 import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
 
+/**
+ * Persist only what you need.
+ * We persist auth (so token/currentUser survive refresh) and tasks.
+ */
 const authPersistConfig = {
   key: "auth",
   storage,
+  whitelist: ["currentUser", "isAuthenticated", "profiles"], // keep token via currentUser.token
 };
 
 const tasksPersistConfig = {
@@ -21,13 +26,12 @@ const rootReducer = combineReducers({
   tasks: persistReducer(tasksPersistConfig, tasksReducer),
 });
 
-const persistedReducer = rootReducer;
-
 export const store = configureStore({
-  reducer: persistedReducer,
+  reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
+        // redux-persist actions
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }),

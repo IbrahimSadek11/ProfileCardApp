@@ -9,7 +9,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { signup, login, clearError } from "../../features/auth/authSlice"; 
+import { signup, login, clearError } from "../../features/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -21,7 +21,7 @@ import "react-toastify/dist/ReactToastify.css";
 const signupSchema = yup.object().shape({
   name: yup
     .string()
-    .trim("No leading or trailing spaces allowed")
+    .trim()
     .strict(true)
     .required("Name is required")
     .matches(/\S/, "Name cannot be only spaces")
@@ -34,10 +34,7 @@ const signupSchema = yup.object().shape({
     .string()
     .required("Email is required")
     .email("Invalid email format")
-    .matches(
-      /^[\w.-]+@([\w-]+\.)+(com|net|org|edu)$/,
-      "Email must end with .com, .net, .org, or .edu"
-    ),
+    .matches(/^[\w.-]+@([\w-]+\.)+(com|net|org|edu)$/, "Email must end with .com, .net, .org, or .edu"),
   password: yup
     .string()
     .required("Password is required")
@@ -57,7 +54,7 @@ const loginSchema = yup.object().shape({
   email: yup
     .string()
     .required("Email is required")
-    .email("Invalid email")    
+    .email("Invalid email")
     .matches(/^[\w.-]+@([\w-]+\.)+(com|net|org|edu)$/,"Email must end with .com, .net, .org, or .edu"),
   password: yup.string().required("Password is required"),
 });
@@ -68,7 +65,7 @@ function AuthForm() {
   const location = useLocation();
   const isSignup = location.pathname === "/signup";
 
-  const { isAuthenticated, error } = useSelector((state) => state.auth);
+  const { isAuthenticated, error, loading } = useSelector((state) => state.auth);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -88,9 +85,7 @@ function AuthForm() {
   }, [isSignup, reset]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/dashboard");
-    }
+    if (isAuthenticated) navigate("/dashboard");
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
@@ -102,9 +97,11 @@ function AuthForm() {
 
   const onSubmit = (data) => {
     if (isSignup) {
-      dispatch(signup(data));
+      const { name, email, password } = data;
+      dispatch(signup({ name, email, password }));
     } else {
-      dispatch(login(data));
+      const { email, password } = data;
+      dispatch(login({ email, password }));
     }
   };
 
@@ -112,9 +109,7 @@ function AuthForm() {
     <form className="AuthForm" onSubmit={handleSubmit(onSubmit)}>
       <h2 className="auth-title">{isSignup ? "Sign up" : "Welcome Back"}</h2>
       <p className="auth-subtitle">
-        {isSignup
-          ? "Hey enter your details to create your account"
-          : "Login to access your account"}
+        {isSignup ? "Hey enter your details to create your account" : "Login to access your account"}
       </p>
 
       {isSignup ? (
@@ -278,8 +273,8 @@ function AuthForm() {
         </div>
       )}
 
-      <Button type="submit" variant="contained" className="submit-btn" fullWidth>
-        {isSignup ? "Sign Up" : "Login"}
+      <Button type="submit" variant="contained" className="submit-btn" fullWidth disabled={loading}>
+        {loading ? (isSignup ? "Creating..." : "Logging in...") : isSignup ? "Sign Up" : "Login"}
       </Button>
 
       <p className="auth-footer">
