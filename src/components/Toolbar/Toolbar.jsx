@@ -1,13 +1,15 @@
 import SearchBar from "../SearchBar/SearchBar";
-import "../SearchBar/SearchBar.css"
+import "../SearchBar/SearchBar.css";
 
-function Toolbar (props) {
-    return(
-        <div className="Toolbar">
-            <p>{props.ArrayName}: {props.Array.length}</p>
-            <SearchBar onFilter={props.onFilter}  /> 
-        </div>
-    )
+function Toolbar({ ArrayName, Array, onFilter }) {
+  return (
+    <div className="Toolbar">
+      <p>
+        {ArrayName}: {Array.length}
+      </p>
+      <SearchBar onFilter={onFilter} />
+    </div>
+  );
 }
 
 export default Toolbar;

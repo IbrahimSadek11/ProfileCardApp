@@ -1,49 +1,43 @@
 import React, { useEffect } from "react";
 import { Modal, Box, TextField, Button } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { updatedProfile } from "../../features/auth/authSlice";
+import { updateProfile } from "../../features/profiles/profileSlice";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-  const schema = yup.object().shape({
-    name: yup
-      .string()
-      .trim("No leading or trailing spaces allowed")
-      .strict(true)
-      .required("Name is required")
-      .min(3, "Name must be at least 3 characters")
-      .max(30, "Name cannot exceed 30 characters")
-      .matches(/^[A-Za-z\s]+$/, "Name must contain only letters and spaces")
-      .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row"),
-    job: yup
-      .string()
-      .trim("No leading or trailing spaces allowed")
-      .strict(true)
-      .required("Job is required")
-      .min(3, "Job must be at least 3 characters")
-      .max(40, "Job cannot exceed 40 characters")
-      .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row"),
-    phone: yup
-      .string()
-      .trim("No leading or trailing spaces allowed")
-      .strict(true)
-      .required("Phone number is required")
-      .matches(/^\+961\s\d{2}\s\d{3}\s\d{3}$/, "Phone must be in format +961 XX XXX XXX"),
-    email: yup.string().email("Invalid email format"),
-  });
-
+const schema = yup.object().shape({
+  name: yup
+    .string()
+    .trim("No leading or trailing spaces allowed")
+    .strict(true)
+    .required("Name is required")
+    .min(3, "Name must be at least 3 characters")
+    .max(30, "Name cannot exceed 30 characters")
+    .matches(/^[A-Za-z\s]+$/, "Name must contain only letters and spaces")
+    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row"),
+  job: yup
+    .string()
+    .trim("No leading or trailing spaces allowed")
+    .strict(true)
+    .required("Job is required")
+    .min(3, "Job must be at least 3 characters")
+    .max(40, "Job cannot exceed 40 characters")
+    .matches(/^(?!.*\s{2,}).*$/, "Job cannot contain multiple spaces in a row"),
+  phone: yup
+    .string()
+    .trim("No leading or trailing spaces allowed")
+    .strict(true)
+    .required("Phone number is required")
+    .matches(
+      /^\+961\s(03|01|70|71|76)\s\d{3}\s\d{3}$/,
+      "Phone must be in format +961 03 XXX XXX"
+    ),
+  email: yup.string().email("Invalid email format"),
+});
 
 function EditProfileModal({ open, handleClose, profile }) {
   const dispatch = useDispatch();
-
-  const toBase64 = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (err) => reject(err);
-      reader.readAsDataURL(file);
-    });
 
   const {
     control,
@@ -55,35 +49,38 @@ function EditProfileModal({ open, handleClose, profile }) {
     resolver: yupResolver(schema),
     defaultValues: {
       name: profile?.name || "",
-      job: profile?.job === "unknown position" ? "" : profile?.job || "", 
+      job: profile?.job || "",
       phone: profile?.phone || "",
       email: profile?.email || "",
-      image: profile?.image || "",
+      imageUrl: profile?.imageUrl || "/assets/default.png",
     },
   });
 
   useEffect(() => {
     reset({
       name: profile?.name || "",
-      job: profile?.job === "unknown position" ? "" : profile?.job || "",
+      job: profile?.job || "",
       phone: profile?.phone || "",
       email: profile?.email || "",
-      image: profile?.image || "",
+      imageUrl: profile?.imageUrl || "/assets/default.png",
     });
   }, [profile, reset]);
 
-
-  const handleChangeImage = async (e) => {
-    if (e.target.files?.[0]) {
-      const base64 = await toBase64(e.target.files[0]);
-      setValue("image", base64);
+  const handleChangeImage = (e) => {
+    const fileName = e.target.value.split("\\").pop();
+    if (fileName) {
+      setValue("imageUrl", `/assets/${fileName}`);
     }
   };
 
   const onSubmit = (data) => {
-    dispatch(updatedProfile({ id: profile.id, changes: data }));
+    if (!data.imageUrl || data.imageUrl.trim() === "") {
+      data.imageUrl = profile.imageUrl || "/assets/default.png";
+    }
+    dispatch(updateProfile({ id: profile.id, ...data }));
     handleClose();
   };
+
 
   return (
     <Modal open={open} onClose={handleClose}>
@@ -129,24 +126,27 @@ function EditProfileModal({ open, handleClose, profile }) {
             }}
           >
             <Controller
-              name="image"
+              name="imageUrl"
               control={control}
-              render={({ field }) =>
-                field.value ? (
-                  <img
-                    src={field.value}
-                    alt="Preview"
-                    style={{
-                      width: "150px",
-                      height: "150px",
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      border: "2px solid var(--gray-300)",
-                    }}
-                  />
-                ) : null
-              }
+              render={({ field }) => (
+                <img
+                  src={field.value || "/assets/default.png"}
+                  alt="Profile Preview"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/assets/default.png";
+                  }}
+                  style={{
+                    width: "150px",
+                    height: "150px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "2px solid var(--gray-300)",
+                  }}
+                />
+              )}
             />
+
             <Button
               variant="outlined"
               component="label"
@@ -159,11 +159,16 @@ function EditProfileModal({ open, handleClose, profile }) {
                 },
               }}
             >
-              Upload Image
-              <input type="file" hidden name="image" onChange={handleChangeImage} />
+              Choose Image
+              <input
+                type="file"
+                hidden
+                name="imageUrl"
+                accept=".png,.jpg,.jpeg"
+                onChange={handleChangeImage}
+              />
             </Button>
           </Box>
-
           <Box
             sx={{
               flex: { xs: "unset", md: "2 1 400px" },
@@ -199,38 +204,38 @@ function EditProfileModal({ open, handleClose, profile }) {
                 />
               )}
             />
-            
-          {["name", "job", "phone"].map((item) => (
-            <Controller
-              key={item}
-              name={item}
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label={item.charAt(0).toUpperCase() + item.slice(1)}
-                  fullWidth
-                  error={!!errors[item]}
-                  helperText={errors[item]?.message}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      color: "var(--dark-color)",
-                      "& input": { color: "var(--dark-color)" },
-                      "& fieldset": { borderColor: "var(--gray-300)" },
-                      "&:hover fieldset": { borderColor: "var(--main-color)" },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "var(--main-color-alt)",
+
+            {["name", "job", "phone"].map((item) => (
+              <Controller
+                key={item}
+                name={item}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label={item.charAt(0).toUpperCase() + item.slice(1)}
+                    fullWidth
+                    error={!!errors[item]}
+                    helperText={errors[item]?.message}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        color: "var(--dark-color)",
+                        "& input": { color: "var(--dark-color)" },
+                        "& fieldset": { borderColor: "var(--gray-300)" },
+                        "&:hover fieldset": { borderColor: "var(--main-color)" },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "var(--main-color-alt)",
+                        },
                       },
-                    },
-                    "& .MuiInputLabel-root": { color: "var(--gray)" },
-                    "& .MuiInputLabel-root.Mui-focused": {
-                      color: "var(--main-color)",
-                    },
-                  }}
-                />
-              )}
-            />
-          ))}
+                      "& .MuiInputLabel-root": { color: "var(--gray)" },
+                      "& .MuiInputLabel-root.Mui-focused": {
+                        color: "var(--main-color)",
+                      },
+                    }}
+                  />
+                )}
+              />
+            ))}
           </Box>
         </Box>
 

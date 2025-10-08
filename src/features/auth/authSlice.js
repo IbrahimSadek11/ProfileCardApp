@@ -1,19 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../../lib/api"; // axios instance with baseURL & interceptor (see file below)
+import api from "../../lib/api";
 
-/**
- * Auth thunks
- */
 export const signup = createAsyncThunk(
   "auth/signup",
   async ({ name, email, password }, thunkAPI) => {
     try {
       const res = await api.post("/auth/signup", { name, email, password });
-      return res.data; // { id, email, role, token }
+      if (!res.data.success) throw new Error(res.data.message);
+      return res.data.data;
     } catch (err) {
       const msg =
         err.response?.data?.message ||
-        err.response?.data ||
+        err.message ||
         "Signup failed. Please try again.";
       return thunkAPI.rejectWithValue(msg);
     }
@@ -25,11 +23,12 @@ export const login = createAsyncThunk(
   async ({ email, password }, thunkAPI) => {
     try {
       const res = await api.post("/auth/login", { email, password });
-      return res.data; // { id, email, role, token }
+      if (!res.data.success) throw new Error(res.data.message);
+      return res.data.data;
     } catch (err) {
       const msg =
         err.response?.data?.message ||
-        err.response?.data ||
+        err.message ||
         "Invalid email or password.";
       return thunkAPI.rejectWithValue(msg);
     }
@@ -37,8 +36,8 @@ export const login = createAsyncThunk(
 );
 
 const initialState = {
-  currentUser: null,      // { id, email, role, token }
-  profiles: [],           // will be filled client-side or after fetch
+  currentUser: null,
+  profiles: [],
   isAuthenticated: false,
   loading: false,
   error: null,
@@ -52,7 +51,6 @@ const authSlice = createSlice({
       state.currentUser = null;
       state.isAuthenticated = false;
       state.error = null;
-      // also remove token from storage
       try {
         localStorage.removeItem("token");
       } catch {}
@@ -60,24 +58,17 @@ const authSlice = createSlice({
     clearError(state) {
       state.error = null;
     },
-    /**
-     * Keep this for your EditProfileModal
-     */
     updatedProfile(state, action) {
       const { id, changes } = action.payload;
       const profile = state.profiles.find((p) => String(p.id) === String(id));
       if (profile) Object.assign(profile, changes);
     },
-    /**
-     * Seed/replace profiles (optional helper if you load them elsewhere)
-     */
     setProfiles(state, action) {
       state.profiles = action.payload || [];
     },
   },
   extraReducers: (builder) => {
     builder
-      // signup
       .addCase(signup.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -87,9 +78,8 @@ const authSlice = createSlice({
         state.currentUser = action.payload;
         state.isAuthenticated = true;
         try {
-          if (action.payload?.token) {
+          if (action.payload?.token)
             localStorage.setItem("token", action.payload.token);
-          }
         } catch {}
       })
       .addCase(signup.rejected, (state, action) => {
@@ -97,8 +87,6 @@ const authSlice = createSlice({
         state.error = action.payload;
         state.isAuthenticated = false;
       })
-
-      // login
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -108,9 +96,8 @@ const authSlice = createSlice({
         state.currentUser = action.payload;
         state.isAuthenticated = true;
         try {
-          if (action.payload?.token) {
+          if (action.payload?.token)
             localStorage.setItem("token", action.payload.token);
-          }
         } catch {}
       })
       .addCase(login.rejected, (state, action) => {
@@ -121,5 +108,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError, updatedProfile, setProfiles } = authSlice.actions;
+export const { logout, clearError, updatedProfile, setProfiles } =
+  authSlice.actions;
 export default authSlice.reducer;

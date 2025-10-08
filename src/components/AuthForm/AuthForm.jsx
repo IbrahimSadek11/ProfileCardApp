@@ -21,7 +21,6 @@ import "react-toastify/dist/ReactToastify.css";
 const signupSchema = yup.object().shape({
   name: yup
     .string()
-    .trim()
     .strict(true)
     .required("Name is required")
     .matches(/\S/, "Name cannot be only spaces")

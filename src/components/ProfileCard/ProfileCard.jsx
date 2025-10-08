@@ -9,19 +9,20 @@ import Tooltip from "@mui/material/Tooltip";
 
 function ProfileCard({ id }) {
   const navigate = useNavigate();
-  const { currentUser, profiles } = useSelector((state) => state.auth);
+  const { currentUser } = useSelector((state) => state.auth);
+  const { profiles } = useSelector((state) => state.profiles);
 
   const [openModal, setOpenModal] = useState(false);
 
   const profile = profiles.find((p) => String(p.id) === String(id));
   if (!profile) return null;
 
-  const canEdit = currentUser?.role === "admin" || String(currentUser?.id) === String(id);
+  const canEdit =
+    currentUser?.role === "admin" || String(currentUser?.id) === String(id);
 
   const handleClick = () => {
     navigate(`/tasks/${id}`);
   };
-
 
   return (
     <div className="profile-card classic" style={{ position: "relative" }}>
@@ -37,9 +38,7 @@ function ProfileCard({ id }) {
                 fontSize: "0.8rem",
               },
             },
-            arrow: {
-              sx: { color: "var(--dark-color)" },
-            },
+            arrow: { sx: { color: "var(--dark-color)" } },
           }}
         >
           <IconButton
@@ -66,20 +65,33 @@ function ProfileCard({ id }) {
       )}
 
       <div className="banner"></div>
-
+      {console.log("image:", profile)}
       <div className="avatar">
-        <img src={profile.image} alt={profile.name} loading="lazy" />
+        <img
+          src={
+            profile.imageUrl && profile.imageUrl.trim() !== ""
+              ? profile.imageUrl
+              : "/assets/default.png"
+          }
+          alt={profile.name}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "/assets/default.png";
+          }}
+        />
       </div>
 
       <h2 className="name">{profile.name}</h2>
-      <h3 className="job">{profile.job}</h3>
+      <h3 className="job">{profile.job || "Unknown Position"}</h3>
 
       <div className="contact">
         <p>
-          <i className="fa-solid fa-phone"></i> {profile.phone}
+          <i className="fa-solid fa-phone"></i>{" "}
+          {profile.phone || "+961 00 000 000"}
         </p>
         <p>
-          <i className="fa-solid fa-envelope"></i> {profile.email}
+          <i className="fa-solid fa-envelope"></i>{" "}
+          {profile.email || "no-email@taskify.com"}
         </p>
       </div>
 

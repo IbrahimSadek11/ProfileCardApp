@@ -1,7 +1,6 @@
 import AuthForm from "../../components/AuthForm/AuthForm";
 import ThemeToggle from "../../components/ThemeToggle/ThemeToggle";
 import "./AuthPage.css";
-import LoginImg from "../../assets/login.svg"; 
 
 function AuthPage() {
   return (
@@ -13,8 +12,8 @@ function AuthPage() {
       <div className="container">
         <div className="auth-illustration">
           <img
-            src={LoginImg}
-            alt="Illustration"
+            src="/assets/login.svg"
+            alt="Login Illustration"
             loading="lazy"
           />
         </div>
