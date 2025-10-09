@@ -86,11 +86,26 @@ function Navbar() {
               <ThemeToggle />
             </IconButton>
           </Tooltip>
-
           {isAuthenticated && (
-            <button className="logout-btn" onClick={handleLogout}>
-              <LogoutIcon />
-            </button>
+            <Tooltip
+              title="Logout"
+              placement="bottom"
+              arrow
+              componentsProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--dark-color)",
+                    color: "var(--white-color)",
+                    fontSize: "0.8rem",
+                  },
+                },
+                arrow: { sx: { color: "var(--dark-color)" } },
+              }}
+            >
+              <button className="logout-btn" onClick={handleLogout}>
+                <LogoutIcon />
+              </button>
+            </Tooltip>
           )}
         </div>
       </div>

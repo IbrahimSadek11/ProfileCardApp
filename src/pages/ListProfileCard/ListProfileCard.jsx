@@ -14,7 +14,6 @@ function ListProfileCard() {
   const dispatch = useDispatch();
   const { profiles, loading } = useSelector((state) => state.profiles);
   const { currentUser } = useSelector((state) => state.auth);
-
   const [visibleCount, setVisibleCount] = useState(3);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -28,6 +27,7 @@ function ListProfileCard() {
     const currentProfile = profiles.find(
       (p) => String(p.id) === String(currentUser.id)
     );
+
     const otherProfiles = profiles.filter(
       (p) => String(p.id) !== String(currentUser.id)
     );
@@ -45,8 +45,10 @@ function ListProfileCard() {
   const currentProfiles = filteredProfiles.slice(0, visibleCount);
 
   const handleFilter = (value) => {
-    setSearchTerm(value);
-    setVisibleCount(3);
+    if (value !== searchTerm) {
+      setSearchTerm(value);
+      setVisibleCount(3);
+    }
   };
 
   return (
@@ -55,13 +57,11 @@ function ListProfileCard() {
         <div className="Adjusted-Title">
           <SpecialHead Heading="Profiles" />
         </div>
-
         <Toolbar
           ArrayName="Profiles"
           Array={filteredProfiles}
           onFilter={handleFilter}
         />
-
         {loading ? (
           <FallBack message="Loading profiles..." />
         ) : (
@@ -75,7 +75,6 @@ function ListProfileCard() {
                 <FallBack message="No profiles found." />
               )}
             </div>
-
             {filteredProfiles.length > 0 &&
               visibleCount < filteredProfiles.length && (
                 <LoadMoreButton

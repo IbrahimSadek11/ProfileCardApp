@@ -65,7 +65,6 @@ function ProfileCard({ id }) {
       )}
 
       <div className="banner"></div>
-      {console.log("image:", profile)}
       <div className="avatar">
         <img
           src={
