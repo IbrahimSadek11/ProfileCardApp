@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./TaskTable.css";
 import CreateBtn from "../Create-Btn/Create-Btn";
 import { Link, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { removed } from "../../features/tasks/tasksSlice";
+import { deleteTask, fetchTasks } from "../../features/tasks/tasksSlice";
 import { IconButton, Menu, Chip, Button, Box, Select, MenuItem, FormLabel, TextField, Pagination, Tooltip, } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -14,14 +14,15 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import { useEffect } from "react";
+import api from "../../lib/api";
 
 function TaskTable() {
   const { id } = useParams();
 
   const tasks = useSelector((s) => s.tasks.items);
+  const { priorities, statuses } = useSelector((s) => s.tasks.meta);
   const { currentUser } = useSelector((s) => s.auth);
-  const profiles = useSelector((s) => s.auth.profiles);
+  const profiles = useSelector((s) => s.profiles.profiles);
   const dispatch = useDispatch();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -32,50 +33,85 @@ function TaskTable() {
   const [page, setPage] = useState(1);
   const rowsPerPage = 5;
 
-  const handlePageChange = (e, value) => {
-    setPage(value);
-  };
-
-  const handleToggle = (e) => {
-    setAnchorEl(anchorEl ? null : e.currentTarget);
-  };
-
+  const handlePageChange = (e, value) => setPage(value);
+  const handleToggle = (e) => setAnchorEl(anchorEl ? null : e.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const applyFilter = () => {
+  const normalizeDate = (d) => {
+    if (!d) return "";
+    const parsed = dayjs(d);
+    return parsed.isValid() ? parsed.format("YYYY-MM-DD") : String(d);
+  };
+
+  const isUuid = (val) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      String(val).trim()
+    );
+
+  const buildNetworkSearch = (flt) => {
+    if (!flt.field || !flt.value) return "";
+    if (flt.field === "assignee") {
+      const p = profiles.find((x) => String(x.id) === String(flt.value));
+      return p?.name || String(flt.value);
+    }
+    if (flt.field === "date") return String(flt.value);
+    return String(flt.value);
+  };
+
+  const applyFilter = async () => {
     if (field && pendingValue) {
-      if (field === "id" && pendingValue.trim() === "") {
-        toast.error("Please enter a valid Task ID");
-        setPendingValue("");
-      } else {
-        setAppliedFilter({
-          field,
-          value: field === "id" ? pendingValue.trim() : pendingValue,
-        });
-        setPage(1);
-      }
+      const next = { field, value: field === "id" ? pendingValue.trim() : pendingValue };
+      setAppliedFilter(next);
+      setPage(1);
+
+      const networkSearch = buildNetworkSearch(next);
+      const canServerFilterBySearch = next.field === "status" || next.field === "priority";
+      const canServerFilterById = next.field === "id" && isUuid(next.value);
+
+      try {
+        if (canServerFilterById) {
+          await dispatch(fetchTasks({ id: next.value }));
+        } else if (canServerFilterBySearch) {
+          await dispatch(fetchTasks({ search: networkSearch }));
+        } else {
+          try {
+            await api.get("/task", { params: { search: networkSearch } });
+          } catch {}
+        }
+      } catch { }
     } else {
-      setAppliedFilter({ field: "", value: "" });
+      await handleClearFilter();
     }
     handleClose();
   };
 
-  const clearFilter = () => {
+  const handleClearFilter = async () => {
     setAppliedFilter({ field: "", value: "" });
     setPendingValue("");
     setField("");
     setPage(1);
+    try {
+      await dispatch(fetchTasks({}));
+    } catch {}
+  };
+
+  const clearFilterChip = async () => {
+    await handleClearFilter();
   };
 
   const closeFilter = () => {
     setField("");
     setPendingValue("");
     handleClose();
-  }
+  };
 
-  const handleDelete = (id) => {
-    dispatch(removed(id));
-    toast.success(`Task deleted successfully!`);
+  const handleDelete = async (taskId) => {
+    try {
+      await dispatch(deleteTask(taskId));
+      toast.success("Task deleted successfully!");
+    } catch (err) {
+      toast.error(typeof err === "string" ? err : "Failed to delete task.");
+    }
   };
 
   const roleFilteredTasks = tasks.filter((task) => {
@@ -96,15 +132,9 @@ function TaskTable() {
     if (appliedFilter.field === "id") {
       return String(task.id).toLowerCase().includes(String(appliedFilter.value).toLowerCase());
     }
-    if (appliedFilter.field === "status") {
-      return task.status === appliedFilter.value;
-    }
-    if (appliedFilter.field === "priority") {
-      return task.priority === appliedFilter.value;
-    }
-    if (appliedFilter.field === "date") {
-      return task.date === appliedFilter.value;
-    }
+    if (appliedFilter.field === "status") return task.status === appliedFilter.value;
+    if (appliedFilter.field === "priority") return task.priority === appliedFilter.value;
+    if (appliedFilter.field === "date") return normalizeDate(task.date) === String(appliedFilter.value);
     if (currentUser?.role !== "user" && !id && appliedFilter.field === "assignee") {
       return String(task.assigneeId) === String(appliedFilter.value);
     }
@@ -112,15 +142,15 @@ function TaskTable() {
   });
 
   const startIndex = (page - 1) * rowsPerPage;
-  const paginatedTasks = fullyFilteredTasks.slice(startIndex, startIndex + rowsPerPage);
+  const paginatedTasks = useMemo(
+    () => fullyFilteredTasks.slice(startIndex, startIndex + rowsPerPage),
+    [fullyFilteredTasks, startIndex]
+  );
   const pageCount = Math.ceil(fullyFilteredTasks.length / rowsPerPage);
-  
-  useEffect(() => {
-    if (page > pageCount) {
-      setPage(pageCount > 0 ? pageCount : 1);
-    }
-  }, [page, pageCount]);
 
+  useEffect(() => {
+    if (page > pageCount) setPage(pageCount > 0 ? pageCount : 1);
+  }, [page, pageCount]);
 
   return (
     <div className="task-table-section">
@@ -143,7 +173,7 @@ function TaskTable() {
                     }`
                   : `${appliedFilter.field}: ${appliedFilter.value}`
               }
-              onDelete={clearFilter}
+              onDelete={clearFilterChip}
               variant="outlined"
               className="chip"
             />
@@ -217,10 +247,14 @@ function TaskTable() {
               displayEmpty
             >
               <MenuItem value="">Select Status</MenuItem>
-              <MenuItem value="Pending">Pending</MenuItem>
-              <MenuItem value="In Progress">In Progress</MenuItem>
-              <MenuItem value="Completed">Completed</MenuItem>
-              <MenuItem value="Rejected">Rejected</MenuItem>
+              {(statuses.length
+                ? statuses
+                : ["Pending", "In Progress", "Completed", "Rejected"]
+              ).map((s) => (
+                <MenuItem key={s} value={s}>
+                  {s}
+                </MenuItem>
+              ))}
             </Select>
           )}
 
@@ -231,9 +265,11 @@ function TaskTable() {
               displayEmpty
             >
               <MenuItem value="">Select Priority</MenuItem>
-              <MenuItem value="Low">Low</MenuItem>
-              <MenuItem value="Medium">Medium</MenuItem>
-              <MenuItem value="High">High</MenuItem>
+              {(priorities.length ? priorities : ["Low", "Medium", "High"]).map((p) => (
+                <MenuItem key={p} value={p}>
+                  {p}
+                </MenuItem>
+              ))}
             </Select>
           )}
 
@@ -310,7 +346,7 @@ function TaskTable() {
             </LocalizationProvider>
           )}
 
-          {currentUser?.role !== "user" && field === "assignee" && (
+          {currentUser?.role !== "user" && field === "assignee" && !id && (
             <Select
               value={pendingValue}
               onChange={(e) => setPendingValue(e.target.value)}
@@ -352,9 +388,11 @@ function TaskTable() {
                   <td>{task.id}</td>
                   <td>{task.name}</td>
                   <td>{task.description}</td>
-                  <td>{task.date}</td>
+                  <td>{normalizeDate(task.date)}</td>
                   <td>
-                    {profiles.find((p) => String(p.id) === String(task.assigneeId))?.name}
+                    {profiles.find((p) => String(p.id) === String(task.assigneeId))?.name ||
+                      task.assigneeName ||
+                      task.assigneeId}
                   </td>
                   <td>{task.priority}</td>
                   <td>
@@ -376,13 +414,13 @@ function TaskTable() {
                     <Tooltip title="Edit">
                       <IconButton
                         component={Link}
-                       to={`/tasks/Edit/${task.id}`}
-                      className="edit-btn"
+                        to={`/tasks/Edit/${task.id}`}
+                        className="edit-btn"
                       >
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
-                    
+
                     <Tooltip title="Delete" sx={{ padding: "0px" }}>
                       <IconButton
                         onClick={() => handleDelete(task.id)}

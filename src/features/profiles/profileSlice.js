@@ -44,11 +44,6 @@ const profileSlice = createSlice({
     loading: false,
     error: null,
   },
-  reducers: {
-    clearSelectedProfile: (state) => {
-      state.selectedProfile = null;
-    },
-  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProfiles.pending, (state) => {
@@ -100,5 +95,4 @@ const profileSlice = createSlice({
   },
 });
 
-export const { clearSelectedProfile } = profileSlice.actions;
 export default profileSlice.reducer;

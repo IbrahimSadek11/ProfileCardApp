@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
 import "./ThemeToggle.css";
 
-function ThemeToggle({children}) {
-  const [darkMode, setDarkMode] = useState(false);
+function ThemeToggle({ children }) {
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
 
-  const toggleTheme = () => setDarkMode(!darkMode);
+  const toggleTheme = () => {
+    const next = !darkMode;
+    setDarkMode(next);
+    localStorage.setItem("theme", next ? "dark" : "light");
+  };
 
   useEffect(() => {
     if (darkMode) {

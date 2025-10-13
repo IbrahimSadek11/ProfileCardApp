@@ -109,19 +109,20 @@ function Navbar() {
           )}
         </div>
       </div>
-      {isMobile && (  
+
+      {isMobile && (
         <Drawer
           anchor="left"
           open={menuOpen}
           onClose={() => setMenuOpen(false)}
           PaperProps={{
-            sx: { backgroundColor: "var(--lightWhite-color)", color: "var(--main-color)", width: 250},
+            sx: { backgroundColor: "var(--lightWhite-color)", color: "var(--main-color)", width: 250 },
           }}
         >
           <div className="drawer-header">
             <IconButton
               onClick={() => setMenuOpen(false)}
-              sx={{ color: "var(--main-color)" , padding: 0}}
+              sx={{ color: "var(--main-color)", padding: 0 }}
             >
               <CloseIcon />
             </IconButton>
@@ -136,7 +137,7 @@ function Navbar() {
                   to={item.path}
                   onClick={() => setMenuOpen(false)}
                 >
-                  <ListItemText primary={item.name}  />
+                  <ListItemText primary={item.name} />
                 </ListItemButton>
               </ListItem>
             ))}

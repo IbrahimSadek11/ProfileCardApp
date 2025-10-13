@@ -4,35 +4,33 @@ import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import "./Dashboard.css";
 import SpecialHead from "../../components/SpecialHead/SpecialHead";
+import dayjs from "dayjs";
 
 function Dashboard() {
-  const { currentUser, profiles } = useSelector((s) => s.auth);
+  const currentUser = useSelector((s) => s.auth.currentUser);
+  const profiles = useSelector((s) => s.profiles.profiles);
   const tasks = useSelector((s) => s.tasks.items);
 
-  let userTasks;
-  if (currentUser?.role === "admin") {
-    userTasks = tasks;
-  } else {
-    userTasks = tasks.filter((t) => String(t.assigneeId) === String(currentUser.id));
-  }
+  const userTasks =
+    currentUser?.role === "admin"
+      ? tasks
+      : tasks.filter((t) => String(t.assigneeId) === String(currentUser.id));
 
+  const month0 = dayjs().startOf("month");
+  const month1 = month0.subtract(1, "month");
+  const month2 = month0.subtract(2, "month");
   const intervals = [
-    { start: "2025-09-00", end: "2025-10-00", label: "2025-09" },
-    { start: "2025-10-00", end: "2025-11-00", label: "2025-10" },
-    { start: "2025-11-00", end: "2025-12-00", label: "2025-11" },
+    { label: month2.format("YYYY-MM") },
+    { label: month1.format("YYYY-MM") },
+    { label: month0.format("YYYY-MM") },
   ];
 
-  const seriesData = {
-    pending: [],
-    inProgress: [],
-    completed: [],
-    rejected: [],
-  };
+  const seriesData = { pending: [], inProgress: [], completed: [], rejected: [] };
 
   intervals.forEach((interval) => {
     const tasksInInterval = userTasks.filter((t) => {
       if (!t.date) return false;
-      return t.date >= interval.start && t.date < interval.end;
+      return dayjs(t.date).format("YYYY-MM") === interval.label;
     });
 
     seriesData.pending.push(tasksInInterval.filter((t) => t.status === "Pending").length);
@@ -51,31 +49,27 @@ function Dashboard() {
   const highCount = userTasks.filter((t) => t.priority === "High").length;
 
   const statusCategories = ["Pending", "In Progress", "Completed", "Rejected"];
-  const statusValues = [ pendingCount, inProgressCount, completedCount, rejectedCount, ];
-  const statusColors = [ "var(--status-pending)", "var(--status-inprogress)", "var(--status-completed)", "var(--status-rejected)", ];
+  const statusValues = [pendingCount, inProgressCount, completedCount, rejectedCount];
+  const statusColors = [
+    "var(--status-pending)",
+    "var(--status-inprogress)",
+    "var(--status-completed)",
+    "var(--status-rejected)",
+  ];
 
   const priorityCategories = ["Low", "Medium", "High"];
   const priorityValues = [lowCount, mediumCount, highCount];
-  const priorityColors = [ "#4caf50", "#ff9800", "#f44336", ];
-  const piePalette = [ "#2196f3", "#1787e0", "#4caf50", "#ff9800", "#f44336", "#9c27b0", "#00bcd4", "#8bc34a", "#ff5722", "#795548", "#3f51b5", "#009688" ];
+  const priorityColors = ["#4caf50", "#ff9800", "#f44336"];
+  const piePalette = [
+    "#2196f3", "#1787e0", "#4caf50", "#ff9800", "#f4436c", "#9c27b0",
+    "#00bcd4", "#8bc34a", "#ff5722", "#795548", "#3f51b5", "#009688"
+  ];
 
   const lineOptions = {
     chart: { type: "line", backgroundColor: "transparent", height: 300 },
-    title: {
-      text: "Task Status Timeline",
-      align: "left",
-      x: 25,
-      y: 5,
-      style: { color: "var(--main-color)", },
-    },
-    xAxis: {
-      categories: intervals.map((i) => i.label),
-      labels: { style: { color: "var(--dark-color)" } },
-    },
-    yAxis: {
-      title: { text: "Number of Tasks", style: { color: "var(--dark-color)" } },
-      labels: { style: { color: "var(--dark-color)" } },
-    },
+    title: { text: "Task Status Timeline", align: "left", x: 25, y: 5, style: { color: "var(--main-color)" } },
+    xAxis: { categories: intervals.map((i) => i.label), labels: { style: { color: "var(--dark-color)" } } },
+    yAxis: { title: { text: "Number of Tasks", style: { color: "var(--dark-color)" } }, labels: { style: { color: "var(--dark-color)" } } },
     tooltip: { shared: true, valueSuffix: " tasks" },
     legend: {
       itemStyle: { color: "var(--dark-color)", fontWeight: "bold" },
@@ -92,18 +86,12 @@ function Dashboard() {
 
   const columnOptions = {
     chart: { type: "column", backgroundColor: "transparent", height: 300 },
-    title: {
-      text: "Tasks by Priority",
-      align: "left",
-      style: { color: "var(--main-color)" },
-    },
+    title: { text: "Tasks by Priority", align: "left", style: { color: "var(--main-color)" } },
     xAxis: { categories: priorityCategories, labels: { style: { color: "var(--dark-color)" } } },
     yAxis: { title: { text: "Tasks", style: { color: "var(--dark-color)" } }, labels: { style: { color: "var(--dark-color)" } } },
     tooltip: { valueSuffix: " tasks" },
     legend: { enabled: false },
-    series: [
-      { name: "Tasks", data: priorityValues, colorByPoint: true, colors: priorityColors }
-    ],
+    series: [{ name: "Tasks", data: priorityValues, colorByPoint: true, colors: priorityColors }],
   };
 
   let pieData;
@@ -129,28 +117,10 @@ function Dashboard() {
 
   const pieOptions = {
     chart: { type: "pie", backgroundColor: "transparent", height: 300 },
-    title: {
-      text:
-        currentUser?.role === "admin"
-          ? "Task Distribution by Assignee"
-          : "Task Distribution by Status",
-      align: "left",
-      style: { color: "var(--main-color)" },
-    },
+    title: { text: currentUser?.role === "admin" ? "Task Distribution by Assignee" : "Task Distribution by Status", align: "left", style: { color: "var(--main-color)" } },
     tooltip: { pointFormat: "<b>{point.percentage:.1f}%</b> ({point.y} tasks)" },
-    plotOptions: {
-      pie: {
-        allowPointSelect: false,
-        cursor: "default",
-      },
-    },
-    series: [
-      {
-        name: "Tasks",  
-        colorByPoint: true,
-        data: pieData,
-      },
-    ],
+    plotOptions: { pie: { allowPointSelect: false, cursor: "default" } },
+    series: [{ name: "Tasks", colorByPoint: true, data: pieData }],
   };
 
   return (

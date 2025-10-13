@@ -1,6 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../lib/api";
 
+const isTokenValid = (token) => {
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1])); 
+    const exp = payload.exp * 1000; 
+    return Date.now() < exp; 
+  } catch {
+    return false;
+  }
+};
+
 export const signup = createAsyncThunk(
   "auth/signup",
   async ({ name, email, password }, thunkAPI) => {
@@ -23,6 +34,7 @@ export const login = createAsyncThunk(
   async ({ email, password }, thunkAPI) => {
     try {
       const res = await api.post("/auth/login", { email, password });
+      console.log(res);
       if (!res.data.success) throw new Error(res.data.message);
       return res.data.data;
     } catch (err) {
@@ -35,10 +47,12 @@ export const login = createAsyncThunk(
   }
 );
 
+const savedToken = localStorage.getItem("token");
+const validToken = isTokenValid(savedToken);
+
 const initialState = {
-  currentUser: null,
-  profiles: [],
-  isAuthenticated: false,
+  currentUser: validToken ? { token: savedToken } : null,
+  isAuthenticated: validToken,
   loading: false,
   error: null,
 };
@@ -57,15 +71,7 @@ const authSlice = createSlice({
     },
     clearError(state) {
       state.error = null;
-    },
-    updatedProfile(state, action) {
-      const { id, changes } = action.payload;
-      const profile = state.profiles.find((p) => String(p.id) === String(id));
-      if (profile) Object.assign(profile, changes);
-    },
-    setProfiles(state, action) {
-      state.profiles = action.payload || [];
-    },
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -76,7 +82,7 @@ const authSlice = createSlice({
       .addCase(signup.fulfilled, (state, action) => {
         state.loading = false;
         state.currentUser = action.payload;
-        state.isAuthenticated = true;
+        state.isAuthenticated = isTokenValid(action.payload?.token);
         try {
           if (action.payload?.token)
             localStorage.setItem("token", action.payload.token);
@@ -94,7 +100,7 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.currentUser = action.payload;
-        state.isAuthenticated = true;
+        state.isAuthenticated = isTokenValid(action.payload?.token);
         try {
           if (action.payload?.token)
             localStorage.setItem("token", action.payload.token);
@@ -108,6 +114,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError, updatedProfile, setProfiles } =
-  authSlice.actions;
+export const { logout, clearError} = authSlice.actions;
+
 export default authSlice.reducer;

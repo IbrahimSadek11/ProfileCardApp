@@ -1,15 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import SpecialHead from "../../components/SpecialHead/SpecialHead";
 import TaskTable from "../../components/TaskTable/TaskTable";
-import './ListOfTasks.css';
-import { useSelector } from "react-redux";
+import "./ListOfTasks.css";
+import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import FallBack from "../../components/FallBack/FallBack";
 import NotFound from "../NotFound/NotFound";
+import { fetchTasks } from "../../features/tasks/tasksSlice";
+import { fetchProfiles } from "../../features/profiles/profileSlice";
 
 function ListOfTasks() {
-  const { currentUser, profiles } = useSelector((s) => s.auth);
+  const dispatch = useDispatch();
+  const currentUser = useSelector((s) => s.auth.currentUser);
+  const profiles = useSelector((s) => s.profiles.profiles);
+
   const { id } = useParams();
+
+  useEffect(() => {
+    dispatch(fetchTasks());
+    dispatch(fetchProfiles());
+  }, [dispatch, id]);
 
   if (currentUser?.role === "user" && id && String(currentUser.id) !== String(id)) {
     return (
@@ -22,7 +32,6 @@ function ListOfTasks() {
   }
 
   let headingText;
-  
   if (currentUser?.role === "user") {
     headingText = `My Tasks`;
   } else if (currentUser?.role === "admin") {
@@ -47,7 +56,7 @@ function ListOfTasks() {
     <section id="ListOfTasks">
       <div className="container">
         <div className="Adjusted-Title">
-            <SpecialHead Heading={headingText} /> 
+          <SpecialHead Heading={headingText} />
         </div>
         <TaskTable />
       </div>

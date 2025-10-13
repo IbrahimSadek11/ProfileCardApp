@@ -6,7 +6,7 @@ import SpecialHead from "../../components/SpecialHead/SpecialHead";
 import Toolbar from "../../components/Toolbar/Toolbar";
 import LoadMoreButton from "../../components/LoadMoreButton/LoadMoreButton";
 import FallBack from "../../components/FallBack/FallBack";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProfiles } from "../../features/profiles/profileSlice";
 
@@ -14,8 +14,8 @@ function ListProfileCard() {
   const dispatch = useDispatch();
   const { profiles, loading } = useSelector((state) => state.profiles);
   const { currentUser } = useSelector((state) => state.auth);
+
   const [visibleCount, setVisibleCount] = useState(3);
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     dispatch(fetchProfiles());
@@ -27,7 +27,6 @@ function ListProfileCard() {
     const currentProfile = profiles.find(
       (p) => String(p.id) === String(currentUser.id)
     );
-
     const otherProfiles = profiles.filter(
       (p) => String(p.id) !== String(currentUser.id)
     );
@@ -35,21 +34,23 @@ function ListProfileCard() {
     return currentProfile ? [currentProfile, ...otherProfiles] : profiles;
   }, [profiles, currentUser]);
 
-  const filteredProfiles = useMemo(() => {
-    const search = searchTerm.toLowerCase();
-    return orderedProfiles.filter((profile) =>
-      profile?.name?.toLowerCase()?.includes(search)
-    );
-  }, [orderedProfiles, searchTerm]);
+  const currentProfiles = useMemo(
+    () => orderedProfiles.slice(0, visibleCount),
+    [orderedProfiles, visibleCount]
+  );
 
-  const currentProfiles = filteredProfiles.slice(0, visibleCount);
-
-  const handleFilter = (value) => {
-    if (value !== searchTerm) {
-      setSearchTerm(value);
+  const handleFilter = useCallback(
+    (value) => {
       setVisibleCount(3);
-    }
-  };
+      const name = value?.trim();
+      if (name && name.length > 0) {
+        dispatch(fetchProfiles({ name }));
+      } else {
+        dispatch(fetchProfiles());
+      }
+    },
+    [dispatch]
+  );
 
   return (
     <section id="ListProfileCard">
@@ -57,17 +58,19 @@ function ListProfileCard() {
         <div className="Adjusted-Title">
           <SpecialHead Heading="Profiles" />
         </div>
+
         <Toolbar
           ArrayName="Profiles"
-          Array={filteredProfiles}
+          Array={orderedProfiles}
           onFilter={handleFilter}
         />
+
         {loading ? (
           <FallBack message="Loading profiles..." />
         ) : (
           <>
             <div className="row">
-              {filteredProfiles.length > 0 ? (
+              {orderedProfiles.length > 0 ? (
                 currentProfiles.map((profile) => (
                   <ProfileCard key={profile.id} id={profile.id} />
                 ))
@@ -75,13 +78,13 @@ function ListProfileCard() {
                 <FallBack message="No profiles found." />
               )}
             </div>
-            {filteredProfiles.length > 0 &&
-              visibleCount < filteredProfiles.length && (
-                <LoadMoreButton
-                  onClick={() => setVisibleCount((prev) => prev + 3)}
-                  message="Load More Profiles"
-                />
-              )}
+
+            {visibleCount < orderedProfiles.length && (
+              <LoadMoreButton
+                onClick={() => setVisibleCount((prev) => prev + 3)}
+                message="Load More Profiles"
+              />
+            )}
           </>
         )}
       </div>

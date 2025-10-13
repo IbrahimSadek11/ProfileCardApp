@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./TaskForm.css";
 import { useDispatch, useSelector } from "react-redux";
-import { added, updated } from "../../features/tasks/tasksSlice";
+import { createTask, updateTask } from "../../features/tasks/tasksSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -21,67 +21,82 @@ import * as yup from "yup";
 
 import FallBack from "../FallBack/FallBack";
 
-const PRIORITIES = ["Low", "Medium", "High"];
-const STATUSES = ["Pending", "In Progress", "Completed", "Rejected"];
-const today = dayjs().startOf("day");
+const makeSchemas = (PRIORITIES, STATUSES) => {
+  const baseSchema = {
+    name: yup
+      .string()
+      .trim("No leading/trailing spaces allowed")
+      .strict(true)
+      .required("Required")
+      .matches(/\S/, "Cannot be only spaces")
+      .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row")
+      .min(3, "Min 3 chars"),
 
-const baseSchema = {
-  name: yup
-    .string()
-    .trim("No leading/trailing spaces allowed")
-    .strict(true)
-    .required("Required")
-    .matches(/\S/, "Cannot be only spaces")
-    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row")
-    .min(3, "Min 3 chars"),
+    description: yup
+      .string()
+      .trim("No leading/trailing spaces allowed")
+      .strict(true)
+      .required("Required")
+      .matches(/\S/, "Cannot be only spaces")
+      .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row")
+      .min(10, "Min 10 chars"),
 
-  description: yup
-    .string()
-    .trim("No leading/trailing spaces allowed")
-    .strict(true)
-    .required("Required")
-    .matches(/\S/, "Cannot be only spaces")
-    .matches(/^(?!.*\s{2,}).*$/, "Name cannot contain multiple spaces in a row")
-    .min(10, "Min 10 chars"),
+    assigneeId: yup.mixed().required("Required"),
+    priority: yup.string().required("Required").oneOf(PRIORITIES),
+    status: yup.string().required("Required").oneOf(STATUSES),
+  };
 
-  assigneeId: yup.mixed().required("Required"),
-  priority: yup.string().required("Required").oneOf(PRIORITIES),
-  status: yup.string().required("Required").oneOf(STATUSES),
+  const today = dayjs().startOf("day");
+
+  const createSchema = yup.object({
+    ...baseSchema,
+    date: yup
+      .mixed()
+      .required("Required")
+      .test("is-dayjs", "Select a date from the picker", (v) => dayjs.isDayjs(v) && v.isValid())
+      .test("not-past", "Cannot be in the past", (v) => {
+        if (!dayjs.isDayjs(v)) return false;
+        const d = v.startOf("day");
+        return d.isSame(today) || d.isAfter(today);
+      }),
+  });
+
+  const editSchema = yup.object({
+    ...baseSchema,
+    date: yup
+      .mixed()
+      .required("Required")
+      .test("is-dayjs", "Select a date from the picker", (v) => dayjs.isDayjs(v) && v.isValid()),
+  });
+
+  return { createSchema, editSchema };
 };
-
-const createSchema = yup.object({
-  ...baseSchema,
-  date: yup
-    .mixed()
-    .required("Required")
-    .test("is-dayjs", "Select a date from the picker", (v) => dayjs.isDayjs(v) && v.isValid())
-    .test("not-past", "Cannot be in the past", (v) => {
-      if (!dayjs.isDayjs(v)) return false;
-      const d = v.startOf("day");
-      return d.isSame(today) || d.isAfter(today);
-    }),
-});
-
-const editSchema = yup.object({
-  ...baseSchema,
-  date: yup
-    .mixed()
-    .required("Required")
-    .test("is-dayjs", "Select a date from the picker", (v) => dayjs.isDayjs(v) && v.isValid()),
-});
-
-
 
 function TaskForm() {
   const { id } = useParams();
   const tasks = useSelector((state) => state.tasks.items);
-  const profiles = useSelector((state) => state.auth.profiles);
+  const { priorities, statuses } = useSelector((state) => state.tasks.meta);
+  const profiles = useSelector((state) => state.profiles.profiles);
   const { currentUser } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm({
+  const { createSchema, editSchema } = useMemo(
+    () =>
+      makeSchemas(
+        priorities.length ? priorities : ["Low", "Medium", "High"],
+        statuses.length ? statuses : ["Pending", "In Progress", "Completed", "Rejected"]
+      ),
+    [priorities, statuses]
+  );
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
     resolver: yupResolver(id ? editSchema : createSchema),
     defaultValues: {
       name: "",
@@ -89,18 +104,21 @@ function TaskForm() {
       assigneeId: currentUser?.role === "user" ? currentUser.id : null,
       priority: "",
       date: null,
-      status: "Pending",
+      status: statuses[0] || "Pending",
     },
   });
 
-
   const [notFound, setNotFound] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (id) {
       const existingTask = tasks.find((task) => String(task.id) === String(id));
       if (existingTask) {
-        if (currentUser?.role === "user" && String(existingTask.assigneeId) !== String(currentUser.id)) {
+        if (
+          currentUser?.role === "user" &&
+          String(existingTask.assigneeId) !== String(currentUser.id)
+        ) {
           setNotFound(true);
           return;
         }
@@ -116,33 +134,40 @@ function TaskForm() {
     }
   }, [id, reset, tasks, currentUser]);
 
-  const onSubmit = (data) => {
-    if (currentUser?.role === "user") {
-      data.assigneeId = currentUser.id;
-    }
+  const onSubmit = async (data) => {
+    if (submitting) return;
+    setSubmitting(true);
 
-    const taskData = {
-      ...data,
-      date: data.date.format("YYYY-MM-DD"),
-    };
+    try {
+      if (currentUser?.role === "user") data.assigneeId = currentUser.id;
 
-    if (id) {
-      dispatch(updated({ id, changes: taskData }));
-      toast.success("Task updated successfully!");
-    } else {
-      dispatch(added(taskData));
-      toast.success("Task created successfully!");
-    }
-    navigate("/tasks");
+      const payload = {
+        ...data,
+        date: data.date.format("YYYY-MM-DD"),
+      };
+
+      if (id) {
+        await dispatch(updateTask({ id, ...payload })).unwrap();
+        toast.success("Task updated successfully!");
+      } else {
+        await dispatch(createTask(payload)).unwrap();
+        toast.success("Task created successfully!");
+      }
+
+      navigate("/tasks");
+
+    } catch (err) {
+      toast.error(typeof err === "string" ? err : "Something went wrong.");
+      setSubmitting(false);
+    } 
   };
 
-  if (notFound) {
-    return <FallBack message="Task not found or access denied." />;
-  }
+  if (notFound) return <FallBack message="Task not found or access denied." />;
 
-  const assigneeOptions = currentUser?.role === "user"
-    ? [profiles.find((p) => String(p.id) === String(currentUser.id))].filter(Boolean)
-    : profiles;
+  const assigneeOptions =
+    currentUser?.role === "user"
+      ? [profiles.find((p) => String(p.id) === String(currentUser.id))].filter(Boolean)
+      : profiles;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -229,90 +254,92 @@ function TaskForm() {
         </div>
 
         <div className="form-group">
-            <div className="AssignTaskSection">
-              <label>Assign task to</label>
-              <Controller
-                name="assigneeId"
-                control={control}
-                render={({ field }) => (
-                  <Autocomplete
-                    {...field}
-                    disablePortal
-                    disableClearable
-                    options={assigneeOptions}
-                    getOptionLabel={(option) => option.name}
-                    value={assigneeOptions.find((p) => String(p.id) === String(field.value)) || null}
-                    onChange={(event, newValue) => field.onChange(newValue?.id || null)}
-                    disabled={currentUser?.role === "user"}
-                    noOptionsText={<span style={{ color: "var(--dark-color)" }}>No options</span>}   
-                    sx={{
-                      width: "100%",
-                      "& .MuiAutocomplete-input": {
-                        textAlign: "center",
-                        color: "var(--dark-color)",
-                      },
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: "var(--white-color)",
-                        borderRadius: "10px",
-                      },
-                      "& .MuiAutocomplete-option": {
-                        color: "var(--dark-color)",
-                      },
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder="-- Select Assignee --"
-                        error={!!errors.assigneeId}
-                        helperText={errors.assigneeId?.message}
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            backgroundColor: "var(--white-color)",
-                            borderRadius: "10px",
-                            height: "50px",
+          <div className="AssignTaskSection">
+            <label>Assign task to</label>
+            <Controller
+              name="assigneeId"
+              control={control}
+              render={({ field }) => (
+                <Autocomplete
+                  {...field}
+                  disablePortal
+                  disableClearable
+                  options={assigneeOptions}
+                  getOptionLabel={(option) => option?.name || ""}
+                  value={
+                    assigneeOptions.find((p) => String(p.id) === String(field.value)) || null
+                  }
+                  onChange={(event, newValue) => field.onChange(newValue?.id || null)}
+                  disabled={currentUser?.role === "user"}
+                  noOptionsText={<span style={{ color: "var(--dark-color)" }}>No options</span>}   
+                  sx={{
+                    width: "100%",
+                    "& .MuiAutocomplete-input": {
+                      textAlign: "center",
+                      color: "var(--dark-color)",
+                    },
+                    "& .MuiOutlinedInput-root": {
+                      backgroundColor: "var(--white-color)",
+                      borderRadius: "10px",
+                    },
+                    "& .MuiAutocomplete-option": {
+                      color: "var(--dark-color)",
+                    },
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="-- Select Assignee --"
+                      error={!!errors.assigneeId}
+                      helperText={errors.assigneeId?.message}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "var(--white-color)",
+                          borderRadius: "10px",
+                          height: "50px",
 
-                            "& fieldset": { borderColor: "var(--gray-300)" },
-                            "&:hover fieldset": { borderColor: "var(--main-color)" },
-                            "&.Mui-focused fieldset": { borderColor: "var(--main-color)" },
+                          "& fieldset": { borderColor: "var(--gray-300)"},
+                          "&:hover fieldset": { borderColor: "var(--main-color)" },
+                          "&.Mui-focused fieldset": { borderColor: "var(--main-color)" },
 
-                            "&.Mui-disabled": {
-                              backgroundColor: "var(--lightWhite-color)", 
-                              
-                            },
-                            "&.Mui-disabled fieldset": {
-                              borderColor: "var(--gray) !important",
-                            },
+                          "&.Mui-disabled": {
+                            backgroundColor: "var(--lightWhite-color)", 
+                            
                           },
-                          "& .MuiOutlinedInput-input": {
-                            color: "var(--dark-color)",
-                            "&::placeholder": {
-                              color: "#9CA3AF",
-                              opacity: 1,
-                            },
+                          "&.Mui-disabled fieldset": {
+                            borderColor: "var(--gray) !important",
                           },
-                          "& .MuiInputBase-input": {
-                            textAlign: "center",
-                            color: "var(--dark-color)",
-                            "&.Mui-disabled": {
-                              color: "var(--gray) !important",             
-                              WebkitTextFillColor: "var(--gray) !important",
-                              opacity: 1,
-                            },
-                          },
-                          "& .MuiSvgIcon-root": {
-                            color: currentUser?.role === "user" ? "var(--gray)" : "var(--dark-color)",
-                          },
-                          "&.Mui-disabled .MuiSvgIcon-root": {
-                            color: "var(--gray) !important", 
+                        },
+                        "& .MuiOutlinedInput-input": {
+                          color: "var(--dark-color)",
+                          "&::placeholder": {
+                            color: "#9CA3AF",
                             opacity: 1,
                           },
-                        }}
-                      />
-                    )}
-                  />
-                )}
-              />
-            </div>
+                        },
+                        "& .MuiInputBase-input": {
+                          textAlign: "center",
+                          color: "var(--dark-color)",
+                          "&.Mui-disabled": {
+                            color: "var(--gray) !important",             
+                            WebkitTextFillColor: "var(--gray) !important",
+                            opacity: 1,
+                          },
+                        },
+                        "& .MuiSvgIcon-root": {
+                          color: currentUser?.role === "user" ? "var(--gray)" : "var(--dark-color)",
+                        },
+                        "&.Mui-disabled .MuiSvgIcon-root": {
+                          color: "var(--gray) !important", 
+                          opacity: 1,
+                        },
+                      }}
+                    />
+                  )}
+                />
+              )}
+            />
+          </div>
 
           <div className="TaskPriority">
             <label>Task Priority</label>
@@ -363,9 +390,9 @@ function TaskForm() {
                   }}
                 >
                   <MenuItem value="">-- Select Priority --</MenuItem>
-                  {PRIORITIES.map((priority, i) => (
-                    <MenuItem key={i} value={priority}>
-                      {priority}
+                  {(priorities.length ? priorities : ["Low", "Medium", "High"]).map((p) => (
+                    <MenuItem key={p} value={p}>
+                      {p}
                     </MenuItem>
                   ))}
                 </Select>
@@ -507,9 +534,12 @@ function TaskForm() {
                     <MenuItem value="">
                       <em>-- Select Status --</em>
                     </MenuItem>
-                    {STATUSES.map((status, i) => (
-                      <MenuItem key={i} value={status}>
-                        {status}
+                    {(statuses.length
+                      ? statuses
+                      : ["Pending", "In Progress", "Completed", "Rejected"]
+                    ).map((s) => (
+                      <MenuItem key={s} value={s}>
+                        {s}
                       </MenuItem>
                     ))}
                   </Select>
@@ -520,7 +550,7 @@ function TaskForm() {
           )}
         </div>
 
-        <button className="submit-btn" type="submit">
+        <button className="submit-btn" type="submit" disabled={submitting}>
           {id ? "Save Changes" : "Create Task"}
         </button>
       </form>
